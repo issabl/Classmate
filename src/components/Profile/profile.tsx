@@ -1,7 +1,11 @@
 import { Settings } from "lucide-react";
 import { useState } from "react";
 import EditProfile from "./Edit";
-import SettingsModal from "./settings"; // <-- make sure this exists
+import SettingsModal from "./settings"; // make sure file name matches
+
+// Define props type for EditProfile and SettingsModal if needed
+// interface EditProfileProps { onClose: () => void }
+// interface SettingsModalProps { onClose: () => void }
 
 export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
@@ -36,21 +40,19 @@ export default function Profile() {
             Edit Profile
           </button>
 
-          {/* SETTINGS FLOATING MODAL OPENER */}
           <button onClick={() => setShowSettings(true)}>
-          <Settings
-            className="text-white cursor-pointer ml-4"
-            style={{ width: 28, height: 28 }}
-          />
-        </button>
+            <Settings
+              className="text-white cursor-pointer ml-4"
+              style={{ width: 28, height: 28 }}
+            />
+          </button>
         </div>
       </div>
 
       {/* Content */}
       <div className="p-6">
-        <h3 className="font-semibold mb-4 text-gray-800">Achievement Wall</h3>
-
         {/* Achievement Wall */}
+        <h3 className="font-semibold mb-4 text-gray-800">Achievement Wall</h3>
         <div className="grid grid-cols-3 gap-4 mb-9">
           {/* Completed Tasks */}
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#A1FFE1] to-[#5DB958] p-6 text-white shadow-xl w-[180px] h-[120px]">
@@ -96,26 +98,17 @@ export default function Profile() {
         </div>
 
         {/* Teams */}
-        <div className="bg-white rounded-3xl p-6 mb-8 border border-gray-100 shadow-[inset_0_3px_8px_rgba(0,0,0,0.08)]
-                    max-h-[330px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-
+        <div className="bg-white rounded-3xl p-6 mb-8 border border-gray-100 shadow-[inset_0_3px_8px_rgba(0,0,0,0.08)] max-h-[330px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
           {/* App Dev */}
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-4">
-              <div className="w-11 h-11 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl 
-                              flex items-center justify-center text-white font-bold text-sm">
-                AD
-              </div>
-
+              <div className="w-11 h-11 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-white font-bold text-sm">AD</div>
               <div>
                 <p className="font-semibold text-gray-800">App Dev</p>
                 <p className="text-xs text-gray-500">Novin Mae Aguilar • 3 others</p>
               </div>
             </div>
-
-            <button className="bg-black text-white px-5 py-2 rounded-2xl text-sm font-medium hover:bg-gray-900 transition">
-              View Team
-            </button>
+            <button className="bg-black text-white px-5 py-2 rounded-2xl text-sm font-medium hover:bg-gray-900 transition">View Team</button>
           </div>
 
           <div className="h-px bg-gray-100 mb-5"></div>
@@ -123,20 +116,13 @@ export default function Profile() {
           {/* Functional English */}
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-4">
-              <div className="w-11 h-11 bg-gradient-to-br from-green-500 to-blue-500 rounded-2xl 
-                              flex items-center justify-center text-white font-bold text-sm">
-                FE
-              </div>
-
+              <div className="w-11 h-11 bg-gradient-to-br from-green-500 to-blue-500 rounded-2xl flex items-center justify-center text-white font-bold text-sm">FE</div>
               <div>
                 <p className="font-semibold text-gray-800">Functional English</p>
                 <p className="text-xs text-gray-500">Nikol Makaluya • 4 others</p>
               </div>
             </div>
-
-            <span className="bg-amber-400 text-white px-4 py-2 rounded-2xl text-sm font-medium">
-              New Task Added
-            </span>
+            <span className="bg-amber-400 text-white px-4 py-2 rounded-2xl text-sm font-medium">New Task Added</span>
           </div>
 
           <div className="h-px bg-gray-100 mb-5"></div>
@@ -144,32 +130,19 @@ export default function Profile() {
           {/* Database Management */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-11 h-11 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl 
-                              flex items-center justify-center text-white font-bold text-sm">
-                DB
-              </div>
-
+              <div className="w-11 h-11 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center text-white font-bold text-sm">DB</div>
               <div>
                 <p className="font-semibold text-gray-800">Database Management</p>
                 <p className="text-xs text-gray-500">Maria Isabela Tayag • 4 others</p>
               </div>
             </div>
-
-            <span className="bg-rose-500 text-white px-4 py-2 rounded-2xl text-sm font-medium">
-              Deadline Friday!
-            </span>
+            <span className="bg-rose-500 text-white px-4 py-2 rounded-2xl text-sm font-medium">Deadline Friday!</span>
           </div>
-
         </div>
 
         <div className="flex justify-center mt-8">
-          <img
-            src="/ClassMate.png"
-            alt="ClassMate Logo"
-            className="w-auto h-3 filter blur-[1px]"
-          />
+          <img src="/ClassMate.png" alt="ClassMate Logo" className="w-auto h-3 filter blur-[1px]" />
         </div>
-
       </div>
 
       {/* Floating EditProfile modal */}

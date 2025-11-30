@@ -9,14 +9,8 @@ export default function Upcoming({ onClose }: UpcomingProps) {
   const navigate = useNavigate();
 
   const handleBack = () => {
-    // Try to use onClose first, fallback to navigate if needed
-    if (onClose) {
-      onClose();
-    } else {
-      navigate({ to: "/" }); // fallback route
-    }
+    onClose(); // always just close the modal
   };
-
   return (
     // BACKDROP — CLICKING OUTSIDE CLOSES MODAL
     <div
@@ -31,10 +25,11 @@ export default function Upcoming({ onClose }: UpcomingProps) {
         {/* Back Button */}
         <button
   className="text-lg mb-1 -ml-60"
-  onClick={onClose} // just close the modal
+  onClick={handleBack}
 >
   &lt;
 </button>
+
 
 
         {/* Header */}
