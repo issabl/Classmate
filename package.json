@@ -12,6 +12,8 @@
   "dependencies": {
     "@tanstack/react-router": "^1.139.7",
     "@tanstack/router-plugin": "^1.139.7",
+    "@types/react-router-dom": "^5.3.3",
+    "bcrypt": "^6.0.0",
     "lucide-react": "^0.554.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
