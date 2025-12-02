@@ -40,57 +40,57 @@ const SignUp = () => {
       : "";
 
   const handleSignUp = async () => {
-    setServerError("");
-    setSuccessMessage("");
+  setServerError("");
+  setSuccessMessage("");
 
-    const fnErr = validateFullName(fullName);
-    const emErr = validateEmail(email);
-    const pwErr = validatePassword(password);
+  const fnErr = validateFullName(fullName);
+  const emErr = validateEmail(email);
+  const pwErr = validatePassword(password);
 
-    setFullNameError(fnErr);
-    setEmailError(emErr);
-    setPasswordError(pwErr);
+  setFullNameError(fnErr);
+  setEmailError(emErr);
+  setPasswordError(pwErr);
 
-    if (fnErr || emErr || pwErr) return;
+  if (fnErr || emErr || pwErr) return;
 
-    setIsLoading(true);
+  setIsLoading(true);
 
+  try {
+    const res = await fetch("http://localhost:3000/api/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fullName: fullName.trim(),
+        email: email.trim().toLowerCase(),
+        password: password,
+      }),
+    });
+
+    let data: any = {};
+    const text = await res.text();
     try {
-      const res = await fetch("http://localhost:3000/api/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fullName: fullName.trim(),
-          email: email.trim().toLowerCase(),
-          password: password,
-        }),
-      });
-
-      // Always try to parse JSON safely
-      let data: any = {};
-      const text = await res.text();
-      try {
-        data = text ? JSON.parse(text) : {};
-      } catch (e) {
-        console.warn("Response was not valid JSON:", text);
-      }
-
-      if (res.ok) {
-        setSuccessMessage("Account created successfully! Redirecting...");
-        setTimeout(() => navigate({ to: "/signin" }), 2000);
-      } else {
-        // Show exact error from backend
-        setServerError(
-          data.error || data.message || `Server error: ${res.status}`
-        );
-      }
-    } catch (err: any) {
-      console.error("Network error:", err);
-      setServerError("Failed to connect. Is backend running on port 3000?");
-    } finally {
-      setIsLoading(false);
+      data = text ? JSON.parse(text) : {};
+    } catch (e) {
+      console.warn("Response was not valid JSON:", text);
     }
-  };
+
+    if (res.ok) {
+      setSuccessMessage("Account created successfully!");
+
+      // Show success message briefly before redirect
+      setTimeout(() => {
+        navigate({ to: "/" }); // Redirect after 1.2s
+      }, 1200);
+    } else {
+      setServerError(data.error || data.message || `Server error: ${res.status}`);
+    }
+  } catch (err: any) {
+    console.error("Network error:", err);
+    setServerError("Failed to connect. Is backend running on port 3000?");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="flex h-screen w-full">
