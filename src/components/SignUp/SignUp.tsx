@@ -1,24 +1,21 @@
+import { useState } from "react";
 import { Bell, ClipboardList } from "lucide-react";
 
 const SignUp = () => {
-<<<<<<< Updated upstream
-=======
-  // state for inputs + UI
+  // States
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  // error messages
+  // Error states
   const [fullNameError, setFullNameError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [serverError, setServerError] = useState("");
-  
-  // SUCCESS MESSAGE (NEW)
   const [successMessage, setSuccessMessage] = useState("");
 
-  // validators
+  // Validators
   const validateFullName = (name: string) => {
     if (!name.trim()) return "Full name is required.";
     const re = /^[A-Za-z\s]+$/;
@@ -28,38 +25,43 @@ const SignUp = () => {
   const validateEmail = (em: string) => {
     if (!em.trim()) return "Email is required.";
     const re = /^\S+@\S+\.\S+$/;
-    return re.test(em) ? "" : "Please enter a valid email address (example@mail.com).";
+    return re.test(em) ? "" : "Please enter a valid email (e.g., user@example.com).";
   };
 
   const validatePassword = (pw: string) => {
     if (!pw) return "Password is required.";
-    if (pw.length < 6) return "Password should be at least 6 characters.";
+    if (pw.length < 6) return "Password must be at least 6 characters.";
     return "";
   };
 
+  // Handlers
   const handleFullNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFullName(e.target.value);
-    setFullNameError(validateFullName(e.target.value));
+    const value = e.target.value;
+    setFullName(value);
+    setFullNameError(validateFullName(value));
   };
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
-    setEmailError(validateEmail(e.target.value));
+    const value = e.target.value;
+    setEmail(value);
+    setEmailError(validateEmail(value));
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value);
-    setPasswordError(validatePassword(e.target.value));
+    const value = e.target.value;
+    setPassword(value);
+    setPasswordError(validatePassword(value));
   };
 
-  // UPDATED handleSignUp — NO ALERT ANYMORE
   const handleSignUp = async () => {
+    // Reset messages
     setServerError("");
-    setSuccessMessage(""); // clear previous success
+    setSuccessMessage("");
 
+    // Validate all
     const fnErr = validateFullName(fullName);
     const emErr = validateEmail(email);
-    const pwErr = validatePassword(password);
+    const pwErr = validatePasswordError(password);
 
     setFullNameError(fnErr);
     setEmailError(emErr);
@@ -74,26 +76,21 @@ const SignUp = () => {
         body: JSON.stringify({ fullName, email, password }),
       });
 
-      const data = await response.json().catch(() => ({}));
+      const data = await response.json();
 
       if (response.ok) {
-        // SHOW SUCCESS MESSAGE BELOW PASSWORD
-        setSuccessMessage("Account created successfully!");
-        
-        // Auto redirect after user sees the message
+        setSuccessMessage("Account created successfully! Redirecting...");
         setTimeout(() => {
           window.location.href = "/signin";
-        }, 1800);
+        }, 2000);
       } else {
-        setServerError(data.message || "Something went wrong on the server.");
+        setServerError(data.message || data.error || "Signup failed. Try again.");
       }
     } catch (err) {
-      setServerError("Server error — is the backend running?");
-      console.error(err);
+      setServerError("Cannot connect to server. Is the backend running on port 5000?");
     }
   };
 
->>>>>>> Stashed changes
   return (
     <div className="flex h-screen w-full">
       {/* LEFT SIDE — INTRO IMAGE */}
@@ -133,133 +130,97 @@ const SignUp = () => {
         </div>
       </div>
 
-      {/* RIGHT SIDE — SIGN UP FORM */}
-      <div className="w-1/2 h-full flex flex-col justify-center px-24">
-        <img
-          src="/ClassMate.png"
-          alt="ClassMate Logo"
-          className="w-[180px] mb-10 mx-auto mr-6"
-          draggable="false"
-        />
+      {/* RIGHT SIDE — FORM */}
+      <div className="w-1/2 h-full flex flex-col justify-center px-24 bg-gray-50">
+        <img src="/ClassMate.png" alt="Logo" className="w-48 mx-auto mb-8" />
 
-        <h2 className="text-3xl font-bold text-black mb-2 text-center">
-          Create Account
-        </h2>
-        <p className="text-gray-500 mb-7 text-sm text-center">
-          Start organizing your student life
-        </p>
+        <h2 className="text-4xl font-bold text-center mb-2">Create Account</h2>
+        <p className="text-gray-600 text-center mb-8">Start organizing your student life</p>
 
-        {/* INPUTS */}
-        <div className="space-y-6 w-[541px] mx-auto">
+        <div className="space-y-6 w-full max-w-lg mx-auto">
+          {/* Full Name */}
           <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1">
-              Full Name
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
             <input
               type="text"
-              placeholder="Your name"
-              className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-yellow-500/40"
+              placeholder="Juan Dela Cruz"
+              value={fullName}
+              onChange={handleFullNameChange}
+              className={`w-full px-4 py-3 rounded-xl border ${
+                fullNameError ? "border-red-500" : "border-gray-300"
+              } focus:outline-none focus:ring-2 focus:ring-yellow-500`}
             />
+            {fullNameError && <p className="mt-1 text-sm text-red-600">{fullNameError}</p>}
           </div>
 
+          {/* Email */}
           <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1">
-              Email
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <input
               type="email"
-              placeholder="Email"
-              className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-yellow-500/40"
+              placeholder="juan@example.com"
+              value={email}
+              onChange={handleEmailChange}
+              className={`w-full px-4 py-3 rounded-xl border ${
+                emailError ? "border-red-500" : "border-gray-300"
+              } focus:outline-none focus:ring-2 focus:ring-yellow-500`}
             />
+            {emailError && <p className="mt-1 text-sm text-red-600">{emailError}</p>}
           </div>
 
+          {/* Password */}
           <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1">
-              Password
-            </label>
-<<<<<<< Updated upstream
-            <input
-              type="password"
-              placeholder="Password"
-              className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-yellow-500/40"
-            />
-=======
-
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
-                placeholder="Password"
+                placeholder="••••••••"
                 value={password}
                 onChange={handlePasswordChange}
-                className="w-full border border-gray-300 rounded-xl p-3 pr-12 focus:outline-none focus:ring-2 focus:ring-yellow-500/40"
+                className={`w-full px-4 py-3 pr-12 rounded-xl border ${
+                  passwordError ? "border-red-500" : "border-gray-300"
+                } focus:outline-none focus:ring-2 focus:ring-yellow-500`}
               />
-
               <button
                 type="button"
-                className="absolute right-3 top-1/2 -translate-y-1/2"
                 onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
               >
-                {showPassword ? (
-                  <i className="fa-solid fa-eye-slash text-gray-500"></i>
-                ) : (
-                  <i className="fa-solid fa-eye text-gray-500"></i>
-                )}
+                {showPassword ? "Hide" : "Show"}
               </button>
             </div>
-
-            {passwordError && (
-              <p className="mt-2 text-sm text-red-600">{passwordError}</p>
-            )}
-
-            {/* SUCCESS MESSAGE HERE — BELOW PASSWORD */}
-            {successMessage && (
-              <p className="mt-4 text-center text-green-600 font-semibold text-lg">
-                {successMessage}
-              </p>
-            )}
->>>>>>> Stashed changes
+            {passwordError && <p className="mt-1 text-sm text-red-600">{passwordError}</p>}
           </div>
-        </div>
 
-        <button className="w-[541px] py-3 rounded-xl font-medium text-white bg-linear-to-b from-[#D8A75B] to-[#5D3900] shadow-md hover:opacity-95 transition mx-auto mt-8">
-          Sign up
-        </button>
+          {/* Success Message */}
+          {successMessage && (
+            <div className="text-center py-3 bg-green-100 text-green-700 rounded-lg font-medium">
+              {successMessage}
+            </div>
+          )}
 
-<<<<<<< Updated upstream
-=======
-        {/* server error */}
-        {serverError && (
-          <p className="w-[541px] mx-auto mt-3 text-sm text-red-600 text-center">
-            {serverError}
-          </p>
-        )}
+          {/* Server Error */}
+          {serverError && (
+            <div className="text-center py-3 bg-red-100 text-red-700 rounded-lg">
+              {serverError}
+            </div>
+          )}
 
->>>>>>> Stashed changes
-        <div className="flex items-center justify-center gap-3 my-6 text-gray-500 w-[541px] mx-auto">
-          <div className="grow border-t" />
-          <span className="text-sm">or</span>
-          <div className="grow border-t" />
-        </div>
-
-        <button className="w-[541px] border border-gray-300 rounded-xl py-3 flex items-center justify-center gap-3 text-sm hover:bg-gray-50 transition mx-auto">
-          <img
-            src="https://logo.svgcdn.com/logos/google-icon.png"
-            className="w-5 h-5"
-            alt="Google logo"
-          />
-          Sign Up with Google
-        </button>
-
-
-       <p className="text-sm text-center mt-8 text-gray-600 w-[541px] mx-auto">
-          Already have an account?{" "}
-          <a
-            href="/signin"
-            className="font-semibold text-[#A06A28] hover:underline"
+          {/* Submit Button */}
+          <button
+            onClick={handleSignUp}
+            className="w-full py-4 rounded-xl text-white font-bold text-lg bg-gradient-to-b from-[#D8A75B] to-[#8B4513] hover:from-[#c89a50] hover:to-[#7a3a10] transition shadow-lg"
           >
+            Sign Up
+          </button>
+        </div>
+
+        <div className="text-center mt-8 text-gray-600">
+          Already have an account?{" "}
+          <a href="/signin" className="font-bold text-amber-700 hover:underline">
             Sign in
           </a>
-        </p>
+        </div>
       </div>
     </div>
   );
