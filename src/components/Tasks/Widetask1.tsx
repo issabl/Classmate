@@ -1,5 +1,6 @@
-import { Trash2, Share2, Circle, CheckCircle, X, Plus } from "lucide-react";
+import { Trash2, Share2, Circle, CheckCircle, X, Plus, Send } from "lucide-react";
 import { useState, useEffect } from "react";
+
 
 // TASK TYPE (dapat nasa global or shared file to, pero okay muna dito)
 interface Task {
@@ -26,6 +27,8 @@ export default function WideTask1({ task, onClose, onUpdate }: WideTask1Props) {
   const [checklist, setChecklist] = useState(task.checklist);
   const [isEditingDesc, setIsEditingDesc] = useState(false);
   const [newItem, setNewItem] = useState("");
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareEmail, setShareEmail] = useState("");
 
   // AUTO SAVE EVERY CHANGE TO PARENT (TaskCards)
   useEffect(() => {
@@ -160,13 +163,83 @@ export default function WideTask1({ task, onClose, onUpdate }: WideTask1Props) {
 
         {/* Avatars + Share */}
         <div className="flex justify-between items-center mb-4 px-2">
-          <div className="flex -space-x-2">
-            <img src="https://i.pravatar.cc/40?img=1" className="w-8 h-8 rounded-full border-2 border-white" alt="avatar" />
-            <img src="https://i.pravatar.cc/40?img=2" className="w-8 h-8 rounded-full border-2 border-white" alt="avatar" />
-            <img src="https://i.pravatar.cc/40?img=3" className="w-8 h-8 rounded-full border-2 border-white" alt="avatar" />
-          </div>
-          <Share2 className="w-5 h-5 cursor-pointer" />
-        </div>
+  <div className="flex -space-x-2">
+    <img src="https://i.pravatar.cc/40?img=1" className="w-8 h-8 rounded-full border-2 border-white" alt="avatar" />
+    <img src="https://i.pravatar.cc/40?img=2" className="w-8 h-8 rounded-full border-2 border-white" alt="avatar" />
+    <img src="https://i.pravatar.cc/40?img=3" className="w-8 h-8 rounded-full border-2 border-white" alt="avatar" />
+  </div>
+
+  {/* SHARE BUTTON */}
+  <button
+    onClick={() => setShowShareModal(true)}
+    className="p-2 rounded-full bg-amber-100 hover:bg-amber-200 transition"
+  >
+    <Share2 className="w-5 h-5 text-amber-700" />
+  </button>
+</div>
+
+{/* SHARE MODAL – FLOATING BOX */}
+{showShareModal && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+    <div
+      className="bg-gradient-to-b from-amber-50 to-amber-100 rounded-2xl shadow-2xl p-6 w-80 border border-amber-200"
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* Header */}
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="font-bold text-lg text-amber-800">Invite Members</h3>
+        <button
+          onClick={() => setShowShareModal(false)}
+          className="text-amber-700 hover:text-amber-900"
+        >
+          <X size={20} />
+        </button>
+      </div>
+
+      {/* Email Input */}
+      <div className="mb-4">
+       <input
+  type="email"
+  value={shareEmail}
+  onChange={(e) => setShareEmail(e.target.value)}
+  placeholder="Type email and press Enter"
+  className="w-full px-4 py-3 rounded-xl border border-amber-300 
+             focus:outline-none focus:ring-2 focus:ring-amber-400 
+             text-sm placeholder:text-black text-black"
+  onKeyDown={(e) => {
+    if (e.key === "Enter" && shareEmail.trim()) {
+      alert(`Task shared with: ${shareEmail}`);
+      setShareEmail("");
+      setShowShareModal(false);
+    }
+  }}
+/>
+
+
+      </div>
+
+      {/* Send Button */}
+      <button
+        onClick={() => {
+          if (shareEmail.trim()) {
+            alert(`Task shared with: ${shareEmail}`);
+            setShareEmail("");
+            setShowShareModal(false);
+          }
+        }}
+        disabled={!shareEmail.trim()}
+        className={`w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition ${
+          shareEmail.trim()
+            ? "bg-amber-600 text-white hover:bg-amber-700"
+            : "bg-gray-300 text-gray-500 cursor-not-allowed"
+        }`}
+      >
+        <Send size={18} />
+        Send Task
+      </button>
+    </div>
+  </div>
+)}
 
         {/* Description */}
         <p className="text-sm font-bold mb-1">Task Description</p>

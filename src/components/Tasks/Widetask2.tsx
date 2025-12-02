@@ -1,4 +1,4 @@
-import { Trash2, Share2, Circle, CheckCircle, X, Plus } from "lucide-react";
+import { Trash2, Share2, Circle, CheckCircle, X, Plus, Send } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface Task {
@@ -25,19 +25,16 @@ export default function WideTask2({ task, onClose, onUpdate }: WideTask2Props) {
   const [checklist, setChecklist] = useState(task.checklist);
   const [newItem, setNewItem] = useState("");
   const [isEditingDesc, setIsEditingDesc] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareEmail, setShareEmail] = useState("");
 
   useEffect(() => {
-    onUpdate({
-      ...task,
-      startTime,
-      endTime,
-      description,
-      checklist,
-    });
+    onUpdate({ ...task, startTime, endTime, description, checklist });
   }, [startTime, endTime, description, checklist]);
 
   const completedCount = checklist.filter(i => i.done).length;
   const progress = checklist.length > 0 ? Math.round((completedCount / checklist.length) * 100) : 0;
+
   const timeToMinutes = (t: string): number => {
     const [time, period] = t.trim().split(" ");
     let [h, m = 0] = time.split(":").map(Number);
@@ -90,10 +87,7 @@ export default function WideTask2({ task, onClose, onUpdate }: WideTask2Props) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md" onClick={onClose}>
       <div
         className="w-[340px] rounded-3xl shadow-2xl p-6 text-white relative flex flex-col"
-        style={{
-          background: "linear-gradient(180deg, #C5B6D4 0%, #2B0353 100%)",
-          maxHeight: "90vh",
-        }}
+        style={{ background: "linear-gradient(180deg, #C5B6D4 0%, #2B0353 100%)", maxHeight: "90vh" }}
         onClick={(e) => e.stopPropagation()}
       >
         <button className="absolute top-4 right-4 text-white z-10" onClick={onClose}>
@@ -111,10 +105,7 @@ export default function WideTask2({ task, onClose, onUpdate }: WideTask2Props) {
               onChange={(e) => handleTimeChange(e.target.value, true)}
               className="bg-white/20 rounded px-3 py-1.5 text-center font-bold w-20 text-sm outline-none"
             />
-            <button
-              onClick={() => toggleAmPm(setStartTime, startTime)}
-              className="mt-1 text-xs font-bold px-3 py-1 rounded-full bg-purple-800/60"
-            >
+            <button onClick={() => toggleAmPm(setStartTime, startTime)} className="mt-1 text-xs font-bold px-3 py-1 rounded-full bg-purple-800/60">
               {startTime.split(" ")[1] || "PM"}
             </button>
             <span className="block text-white/70 text-xs">Start</span>
@@ -131,47 +122,82 @@ export default function WideTask2({ task, onClose, onUpdate }: WideTask2Props) {
               onChange={(e) => handleTimeChange(e.target.value, false)}
               className="bg-white/20 rounded px-3 py-1.5 text-center font-bold w-20 text-sm outline-none"
             />
-            <button
-              onClick={() => toggleAmPm(setEndTime, endTime)}
-              className="mt-1 text-xs font-bold px-3 py-1 rounded-full bg-purple-800/60"
-            >
+            <button onClick={() => toggleAmPm(setEndTime, endTime)} className="mt-1 text-xs font-bold px-3 py-1 rounded-full bg-purple-800/60">
               {endTime.split(" ")[1] || "PM"}
             </button>
             <span className="block text-white/70 text-xs">End</span>
           </div>
         </div>
 
-        {/* Avatars */}
+        {/* AVATARS + SHARE BUTTON (SAME AS WIDE TASK 1) */}
         <div className="flex justify-between items-center mb-4 px-2">
           <div className="flex -space-x-2">
             <img src="https://i.pravatar.cc/40?img=4" className="w-8 h-8 rounded-full border-2 border-white" alt="" />
             <img src="https://i.pravatar.cc/40?img=5" className="w-8 h-8 rounded-full border-2 border-white" alt="" />
             <img src="https://i.pravatar.cc/40?img=6" className="w-8 h-8 rounded-full border-2 border-white" alt="" />
           </div>
-          <Share2 className="w-5 h-5 cursor-pointer" />
+          <button onClick={() => setShowShareModal(true)} className="p-2 rounded-full bg-purple-100 hover:bg-purple-200 transition">
+            <Share2 className="w-5 h-5 text-purple-700" />
+          </button>
         </div>
 
-        {/* DESCRIPTION — SCROLLABLE */}
+        {/* SHARE MODAL — EXACT SAME SA WIDE TASK 1 */}
+        {showShareModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+            <div className="bg-gradient-to-b from-purple-50 to-purple-100 rounded-2xl shadow-2xl p-6 w-80 border border-purple-200" onClick={(e) => e.stopPropagation()}>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-bold text-lg text-purple-800">Invite Members</h3>
+                <button onClick={() => setShowShareModal(false)} className="text-purple-700 hover:text-purple-900">
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="mb-4">
+                <input
+                  type="email"
+                  value={shareEmail}
+                  onChange={(e) => setShareEmail(e.target.value)}
+                  placeholder="Type email and press Enter"
+                  className="w-full px-4 py-3 rounded-xl border border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm text-black placeholder:text-gray-600"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && shareEmail.trim()) {
+                      alert(`Task shared with: ${shareEmail}`);
+                      setShareEmail("");
+                      setShowShareModal(false);
+                    }
+                  }}
+                />
+              </div>
+              <button
+                onClick={() => {
+                  if (shareEmail.trim()) {
+                    alert(`Task shared with: ${shareEmail}`);
+                    setShareEmail("");
+                    setShowShareModal(false);
+                  }
+                }}
+                disabled={!shareEmail.trim()}
+                className={`w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition ${
+                  shareEmail.trim() ? "bg-purple-600 text-white hover:bg-purple-700" : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                }`}
+              >
+                <Send size={18} />
+                Send Task
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* DESCRIPTION */}
         <p className="text-sm font-bold mb-1">Task Description</p>
-        <div
-          className="bg-white/30 backdrop-blur-sm rounded-xl p-3 text-xs leading-relaxed cursor-text mb-4 max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-white/30"
-          onClick={() => setIsEditingDesc(true)}
-        >
+        <div className="bg-white/30 backdrop-blur-sm rounded-xl p-3 text-xs leading-relaxed cursor-text mb-4 max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-white/30" onClick={() => setIsEditingDesc(true)}>
           {isEditingDesc ? (
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              onBlur={() => setIsEditingDesc(false)}
-              autoFocus
-              className="w-full bg-transparent text-white outline-none resize-none min-h-20"
-              rows={5}
-            />
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} onBlur={() => setIsEditingDesc(false)} autoFocus className="w-full bg-transparent text-white outline-none resize-none min-h-20" rows={5} />
           ) : (
             <p className="whitespace-pre-wrap">{description || "Click to add description..."}</p>
           )}
         </div>
 
-        {/* CHECKLIST — SCROLLABLE, HINDI LALAKI ANG MODAL */}
+        {/* CHECKLIST */}
         <p className="text-sm font-bold mb-2">Checklist</p>
         <div className="flex-1 overflow-y-auto pr-2 -mr-2 scrollbar-thin scrollbar-thumb-white/30 mb-4">
           <div className="space-y-2">
@@ -188,7 +214,6 @@ export default function WideTask2({ task, onClose, onUpdate }: WideTask2Props) {
                 <Plus className="w-4 h-4" />
               </button>
             </div>
-
             {checklist.map((item) => (
               <div key={item.id} className="flex justify-between items-center bg-white/10 rounded-lg px-3 py-2">
                 <div className="flex items-center gap-3 cursor-pointer flex-1" onClick={() => toggleItem(item.id)}>
@@ -203,13 +228,10 @@ export default function WideTask2({ task, onClose, onUpdate }: WideTask2Props) {
           </div>
         </div>
 
-       {/* Progress Bar */}
+        {/* Progress Bar */}
         <div className="mt-auto">
           <div className="w-full bg-white/30 h-10 rounded-full overflow-hidden relative flex items-center">
-            <div
-              className="h-full bg-[#DF8700] rounded-full flex items-center justify-center text-white font-bold text-sm transition-all duration-500"
-              style={{ width: `${progress}%` }}
-            >
+            <div className="h-full bg-[#DF8700] rounded-full flex items-center justify-center text-white font-bold text-sm transition-all duration-500" style={{ width: `${progress}%` }}>
               {progress > 15 && `${progress}%`}
             </div>
             {progress === 0 && <span className="ml-3 text-white/80 text-xs">No items yet</span>}
@@ -217,11 +239,7 @@ export default function WideTask2({ task, onClose, onUpdate }: WideTask2Props) {
           </div>
         </div>
 
-        <button
-          className={`mt-4 w-full py-3 rounded-full font-bold text-lg transition-all ${
-            progress === 100 ? "bg-green-500 hover:bg-green-600 text-white" : "bg-[#FFEACA] text-[#5F3B00] hover:bg-[#ffd4a3]"
-          }`}
-        >
+        <button className={`mt-4 w-full py-3 rounded-full font-bold text-lg transition-all ${progress === 100 ? "bg-green-500 hover:bg-green-600 text-white" : "bg-[#FFEACA] text-[#5F3B00] hover:bg-[#ffd4a3]"}`}>
           {progress === 100 ? "Task Complete!" : "Mark as Complete"}
         </button>
       </div>
