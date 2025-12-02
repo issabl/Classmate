@@ -5,6 +5,6 @@ import { createRoute } from "@tanstack/react-router";
 
 export const signinRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/signin", // change from "/" to "/signin"
+  path: "/", // <-- default route so Sign In opens first
   component: SignIn,
 });

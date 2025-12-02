@@ -16,7 +16,7 @@ export default function ChangePass({ onClose }: { onClose: () => void }) {
           onClick={onClose}
           className="absolute top-4 right-6 text-gray-600 text-xl"
         >
-          ×
+          
         </button>
 
         {/* STEP 1 - CHANGE PASSWORD CONFIRMATION */}
