@@ -24,14 +24,14 @@ export default function Upcoming({ onClose }: UpcomingProps) {
       >
         {/* Back Button */}
      <button
-  className="text-lg mb-1 -ml-60"
-  onClick={(e) => {
-    e.stopPropagation(); // THIS FIXES EVERYTHING
-    handleBack();
-  }}
->
-  &lt;
-</button>
+        className="text-lg mb-1 -ml-60"
+        onClick={(e) => {
+          e.stopPropagation(); // THIS FIXES EVERYTHING
+          handleBack();
+        }}
+      >
+        &lt;
+      </button>
 
 
 

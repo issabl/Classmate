@@ -275,7 +275,7 @@ export default function WideTask3({ task, onClose, onUpdate }: WideTask3Props) {
 
         {/* Progress Bar */}
         <div className="mt-auto">
-          <div className="w-full bg-white/30 h-10 rounded-full overflow-hidden relative flex items-center">
+          <div className="w-full bg-white/30 h-10  rounded-full overflow-hidden relative flex items-center">
             <div
               className="h-full bg-[#DF8700] rounded-full flex items-center justify-center text-white font-bold text-sm transition-all duration-500"
               style={{ width: `${progress}%` }}
