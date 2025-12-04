@@ -1,20 +1,26 @@
 import { Settings } from "lucide-react";
 import { useState } from "react";
 import EditProfile from "./Edit";
-import SettingsModal from "./settings"; // <-- make sure this exists
+import SettingsModal from "./settings"; // make sure file name matches
+
+// Define props type for EditProfile and SettingsModal if needed
+// interface EditProfileProps { onClose: () => void }
+// interface SettingsModalProps { onClose: () => void }
 
 export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
-  return (
-    <div className="bg-white w-[640px] h-[650px] rounded-[30px] shadow-[0px_8px_30px_rgba(0,0,0,0.15)] overflow-hidden relative">
-      
-      {/* Header gradient */}
-      <div
-        className="w-full p-6 flex items-center justify-between rounded-[30px] shadow-[0_8px_30px_rgba(0,0,0,0.15)]"
-        style={{ background: "linear-gradient(to right, #FFB84A, #B36265)" }}
-      >
+return (
+  <div
+    className="w-[640px] h-[650px] rounded-[30px] shadow-[0px_8px_30px_rgba(0,0,0,0.15)] overflow-hidden relative"
+    style={{ backgroundColor: "var(--profile-bg)", color: "var(--profile-text)" }}
+  >
+    {/* Header gradient */}
+    <div
+      className="w-full p-6 flex items-center justify-between rounded-[30px] shadow-[0_8px_30px_rgba(0,0,0,0.15)]"
+      style={{ background: "var(--profile-header)" }}
+    >
         <div className="flex items-center gap-4">
           <img
             src="/issa.jpeg"
@@ -36,21 +42,19 @@ export default function Profile() {
             Edit Profile
           </button>
 
-          {/* SETTINGS FLOATING MODAL OPENER */}
           <button onClick={() => setShowSettings(true)}>
-          <Settings
-            className="text-white cursor-pointer ml-4"
-            style={{ width: 28, height: 28 }}
-          />
-        </button>
+            <Settings
+              className="text-white cursor-pointer ml-4"
+              style={{ width: 28, height: 28 }}
+            />
+          </button>
         </div>
       </div>
 
       {/* Content */}
       <div className="p-6">
-        <h3 className="font-semibold mb-4 text-gray-800">Achievement Wall</h3>
-
         {/* Achievement Wall */}
+        <h3 className="font-semibold mb-4 text-gray-800">Achievement Wall</h3>
         <div className="grid grid-cols-3 gap-4 mb-9">
           {/* Completed Tasks */}
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#A1FFE1] to-[#5DB958] p-6 text-white shadow-xl w-[180px] h-[120px]">
@@ -95,81 +99,87 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Teams */}
-        <div className="bg-white rounded-3xl p-6 mb-8 border border-gray-100 shadow-[inset_0_3px_8px_rgba(0,0,0,0.08)]
-                    max-h-[330px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+{/* Teams */}
+<div
+  className="rounded-3xl p-6 mb-8 border shadow-[inset_0_3px_8px_rgba(0,0,0,0.08)] max-h-[330px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
+  style={{
+    backgroundColor: "var(--teams-bg)",
+    color: "var(--teams-text)",
+    borderColor: "var(--teams-border)"
+  }}
+>
+  {/* App Dev */}
+  <div className="flex items-center justify-between mb-5">
+    <div className="flex items-center gap-4">
+      <div
+        className="w-11 h-11 rounded-2xl flex items-center justify-center text-white font-bold text-sm"
+        style={{ background: "var(--teams-gradient)" }}
+      >
+        AD
+      </div>
+      <div>
+        <p className="font-semibold" style={{ color: "var(--teams-text)" }}>App Dev</p>
+        <p className="text-xs" style={{ color: "var(--teams-text)" }}>Novin Mae Aguilar • 3 others</p>
+      </div>
+    </div>
+    <button className="bg-black text-white px-5 py-2 rounded-2xl text-sm font-medium hover:bg-gray-900 transition">
+      View Team
+    </button>
+  </div>
 
-          {/* App Dev */}
-          <div className="flex items-center justify-between mb-5">
-            <div className="flex items-center gap-4">
-              <div className="w-11 h-11 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl 
-                              flex items-center justify-center text-white font-bold text-sm">
-                AD
-              </div>
+  <div className="h-px mb-5" style={{ backgroundColor: "var(--teams-border)" }}></div>
 
-              <div>
-                <p className="font-semibold text-gray-800">App Dev</p>
-                <p className="text-xs text-gray-500">Novin Mae Aguilar • 3 others</p>
-              </div>
-            </div>
+  {/* Functional English */}
+  <div className="flex items-center justify-between mb-5">
+    <div className="flex items-center gap-4">
+      <div
+        className="w-11 h-11 rounded-2xl flex items-center justify-center text-white font-bold text-sm"
+        style={{ background: "var(--teams-gradient)" }}
+      >
+        FE
+      </div>
+      <div>
+        <p className="font-semibold" style={{ color: "var(--teams-text)" }}>Functional English</p>
+        <p className="text-xs" style={{ color: "var(--teams-text)" }}>Nikol Makaluya • 4 others</p>
+      </div>
+    </div>
+    <span
+      className="px-4 py-2 rounded-2xl text-sm font-medium"
+      style={{ background: "var(--teams-gradient)", color: "#FFF" }}
+    >
+      New Task Added
+    </span>
+  </div>
 
-            <button className="bg-black text-white px-5 py-2 rounded-2xl text-sm font-medium hover:bg-gray-900 transition">
-              View Team
-            </button>
-          </div>
+  <div className="h-px mb-5" style={{ backgroundColor: "var(--teams-border)" }}></div>
 
-          <div className="h-px bg-gray-100 mb-5"></div>
+  {/* Database Management */}
+  <div className="flex items-center justify-between">
+    <div className="flex items-center gap-4">
+      <div
+        className="w-11 h-11 rounded-2xl flex items-center justify-center text-white font-bold text-sm"
+        style={{ background: "var(--teams-gradient)" }}
+      >
+        DB
+      </div>
+      <div>
+        <p className="font-semibold" style={{ color: "var(--teams-text)" }}>Database Management</p>
+        <p className="text-xs" style={{ color: "var(--teams-text)" }}>Maria Isabela Tayag • 4 others</p>
+      </div>
+    </div>
+    <span
+      className="px-4 py-2 rounded-2xl text-sm font-medium"
+      style={{ background: "var(--teams-gradient)", color: "#FFF" }}
+    >
+      Deadline Friday!
+    </span>
+  </div>
+</div>
 
-          {/* Functional English */}
-          <div className="flex items-center justify-between mb-5">
-            <div className="flex items-center gap-4">
-              <div className="w-11 h-11 bg-gradient-to-br from-green-500 to-blue-500 rounded-2xl 
-                              flex items-center justify-center text-white font-bold text-sm">
-                FE
-              </div>
-
-              <div>
-                <p className="font-semibold text-gray-800">Functional English</p>
-                <p className="text-xs text-gray-500">Nikol Makaluya • 4 others</p>
-              </div>
-            </div>
-
-            <span className="bg-amber-400 text-white px-4 py-2 rounded-2xl text-sm font-medium">
-              New Task Added
-            </span>
-          </div>
-
-          <div className="h-px bg-gray-100 mb-5"></div>
-
-          {/* Database Management */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-11 h-11 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl 
-                              flex items-center justify-center text-white font-bold text-sm">
-                DB
-              </div>
-
-              <div>
-                <p className="font-semibold text-gray-800">Database Management</p>
-                <p className="text-xs text-gray-500">Maria Isabela Tayag • 4 others</p>
-              </div>
-            </div>
-
-            <span className="bg-rose-500 text-white px-4 py-2 rounded-2xl text-sm font-medium">
-              Deadline Friday!
-            </span>
-          </div>
-
-        </div>
 
         <div className="flex justify-center mt-8">
-          <img
-            src="/ClassMate.png"
-            alt="ClassMate Logo"
-            className="w-auto h-3 filter blur-[1px]"
-          />
+          <img src="/ClassMate.png" alt="ClassMate Logo" className="w-auto h-3 filter blur-[1px]" />
         </div>
-
       </div>
 
       {/* Floating EditProfile modal */}

@@ -29,38 +29,38 @@ const Calendar = () => {
   };
 
   const calendarWidth = 360;
-  const calendarHeight = 250; // fixed
+  const calendarHeight = 250;
   const totalRows = Math.ceil((prevMonthDays.length + daysArray.length + nextMonthDays.length) / 7);
-  const availableHeight = calendarHeight - 80; // header + weekdays
-  const daySize = Math.min(22, availableHeight / totalRows); // dynamically fit into grid
+  const availableHeight = calendarHeight - 80;
+  const daySize = Math.min(22, availableHeight / totalRows);
 
   return (
     <div
-      className="absolute"
-      style={{ top: 79, left: 1070, width: calendarWidth, height: calendarHeight, fontFamily: "SF PRO" }}
+      className="absolute calendar-container"
+      style={{ top: 79, left: 1026, width: calendarWidth, height: calendarHeight, fontFamily: "SF PRO" }}
     >
-      <div className="bg-[#F8F8F8] rounded-2xl shadow-xl p-4 w-full h-full ">
+      <div className="calendar-container-inner rounded-2xl shadow-xl p-4 w-full h-full">
         {/* Header */}
         <div className="flex justify-between items-center mb-3 -mt-1">
-          <div className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-md cursor-pointer hover:shadow-lg">
+          <div className="w-8 h-8 flex items-center justify-center rounded-lg shadow-md cursor-pointer hover:shadow-lg calendar-btn">
             <button onClick={goPrev}>
-                <ChevronLeft />
+              <ChevronLeft />
             </button>
-            </div>
+          </div>
 
           <div className="relative text-center">
-            <button onClick={() => setShowYears(!showYears)} className="text-xs w-full">
+            <button onClick={() => setShowYears(!showYears)} className="text-xs w-full calendar-text">
               {year}
             </button>
-            <p className="text-l font-semibold">{month}</p>
+            <p className="text-l font-semibold calendar-text">{month}</p>
 
             {showYears && (
-              <div className="absolute top-7 left-1/2 -translate-x-1/2 bg-white shadow-lg rounded-xl p-2 w-20 z-10">
+              <div className="absolute top-7 left-1/2 -translate-x-1/2 bg-white dark:bg-[#160F0A] shadow-lg rounded-xl p-2 w-20 z-10">
                 {[2024, 2025, 2026].map((y) => (
                   <button
                     key={y}
                     onClick={() => changeYear(y)}
-                    className="w-full py-1 hover:bg-gray-100 rounded-lg text-sm"
+                    className="w-full py-1 hover:bg-gray-100 dark:hover:bg-[#2A1F14] rounded-lg text-sm calendar-text"
                   >
                     {y}
                   </button>
@@ -69,16 +69,15 @@ const Calendar = () => {
             )}
           </div>
 
-          <div className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-md cursor-pointer hover:shadow-lg">
+          <div className="w-8 h-8 flex items-center justify-center rounded-lg shadow-md cursor-pointer hover:shadow-lg calendar-btn">
             <button onClick={goNext}>
-                <ChevronRight />
+              <ChevronRight />
             </button>
-            </div>
-
+          </div>
         </div>
 
         {/* Days of the week */}
-        <div className="grid grid-cols-7 text-center text-[11px] text-gray-400 -mt-2 ">
+        <div className="grid grid-cols-7 text-center text-[11px] text-gray-400 -mt-2 calendar-weekdays">
           <p>SUN</p>
           <p>MON</p>
           <p>TUE</p>
@@ -94,7 +93,7 @@ const Calendar = () => {
           {prevMonthDays.map((day, i) => (
             <div
               key={`prev-${i}`}
-              className="flex items-center justify-center rounded-full border border-black text-black"
+              className="flex items-center justify-center rounded-full day prev"
               style={{ width: daySize, height: daySize, fontSize: 12 }}
             >
               {day}
@@ -108,19 +107,11 @@ const Calendar = () => {
               currentDate.getMonth() === today.getMonth() &&
               currentDate.getFullYear() === today.getFullYear();
 
-            const circleStyle = isToday
-              ? {
-                  backgroundColor: "#D8A75B",
-                  color: "black",
-                  boxShadow: "inset 0 0 4px rgba(0,0,0,0.3)",
-                }
-              : { backgroundColor: "#000", color: "white" };
-
             return (
               <div
                 key={day}
-                className="flex items-center justify-center rounded-full cursor-pointer"
-                style={{ width: daySize, height: daySize, ...circleStyle, fontSize: 12 }}
+                className={`flex items-center justify-center rounded-full day current ${isToday ? "today" : ""}`}
+                style={{ width: daySize, height: daySize, fontSize: 12 }}
               >
                 {day}
               </div>
@@ -131,7 +122,7 @@ const Calendar = () => {
           {nextMonthDays.map((day, i) => (
             <div
               key={`next-${i}`}
-              className="flex items-center justify-center rounded-full border border-black text-black"
+              className="flex items-center justify-center rounded-full day next"
               style={{ width: daySize, height: daySize, fontSize: 12 }}
             >
               {day}
