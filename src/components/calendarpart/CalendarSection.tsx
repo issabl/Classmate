@@ -1,7 +1,9 @@
 import MiniCalendar from "./MiniCalendar";
 import { MoreHorizontal } from "lucide-react";
+import { useRouter } from "@tanstack/react-router";
 
 export default function CalendarSection() {
+  const router = useRouter();
   return (
     <div
   className="
@@ -92,21 +94,22 @@ export default function CalendarSection() {
           Quiz Bee by group.
         </p>
       </div>
-
+ 
       {/* -------------------- CREATE TASK BUTTON -------------------- */}
-      <button
-        className="
-          -mb-3 w-full py-3 rounded-full font-medium text-white
-
-          /* EXACT GOLD GRADIENT */
-          bg-gradient-to-b from-[#D9B268] to-[#8B6A2B]
-
-          /* SOFT SHADOW */
-          shadow-[0_4px_10px_rgba(0,0,0,0.12)]
-        "
-      >
-        Create task
-      </button>
+     <button
+  onClick={() => router.navigate({ to: "/add-task" })}
+  className="
+    -mb-3 w-full py-3 rounded-full font-medium text-white
+    bg-gradient-to-b from-[#D9B268] to-[#8B6A2B]
+    shadow-[0_4px_10px_rgba(0,0,0,0.12)]
+    hover:from-[#E0BD75] hover:to-[#9B7A3B] 
+    active:scale-95 
+    transition-all duration-200 
+    cursor-pointer
+  "
+>
+  Create task
+</button>
     </div>
   );
 }
