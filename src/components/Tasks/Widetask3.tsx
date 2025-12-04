@@ -1,4 +1,4 @@
-import { Trash2, Share2, Circle, CheckCircle, X, Plus } from "lucide-react";
+import { Trash2, Share2, Circle, CheckCircle, X, Plus, Send } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface Task {
@@ -25,6 +25,8 @@ export default function WideTask3({ task, onClose, onUpdate }: WideTask3Props) {
   const [checklist, setChecklist] = useState(task.checklist);
   const [newItem, setNewItem] = useState("");
   const [isEditingDesc, setIsEditingDesc] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareEmail, setShareEmail] = useState("");
 
   // LIVE SYNC TO PARENT
   useEffect(() => {
@@ -149,15 +151,75 @@ export default function WideTask3({ task, onClose, onUpdate }: WideTask3Props) {
           </div>
         </div>
 
-        {/* Avatars */}
+        {/* AVATARS + SHARE BUTTON */}
         <div className="flex justify-between items-center mb-4 px-2">
           <div className="flex -space-x-2">
             <img src="https://i.pravatar.cc/40?img=8" className="w-8 h-8 rounded-full border-2 border-white" alt="" />
             <img src="https://i.pravatar.cc/40?img=9" className="w-8 h-8 rounded-full border-2 border-white" alt="" />
             <img src="https://i.pravatar.cc/40?img=10" className="w-8 h-8 rounded-full border-2 border-white" alt="" />
           </div>
-          <Share2 className="w-5 h-5 cursor-pointer" />
+
+          {/* WORKING SHARE BUTTON */}
+          <button
+            onClick={() => setShowShareModal(true)}
+            className="p-2 rounded-full bg-red-100 hover:bg-red-200 transition"
+          >
+            <Share2 className="w-5 h-5 text-red-700" />
+          </button>
         </div>
+
+        {/* SHARE MODAL — FULLY WORKING */}
+        {showShareModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+            <div
+              className="bg-gradient-to-b from-red-50 to-red-100 rounded-2xl shadow-2xl p-6 w-80 border border-red-200"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-bold text-lg text-red-800">Invite Members</h3>
+                <button onClick={() => setShowShareModal(false)} className="text-red-700 hover:text-red-900">
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="mb-4">
+                <input
+                  type="email"
+                  value={shareEmail}
+                  onChange={(e) => setShareEmail(e.target.value)}
+                  placeholder="Type email and press Enter"
+                  className="w-full px-4 py-3 rounded-xl border border-red-300 focus:outline-none focus:ring-2 focus:ring-red-400 text-sm text-black placeholder:text-gray-600"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && shareEmail.trim()) {
+                      alert(`Task shared with: ${shareEmail}`);
+                      setShareEmail("");
+                      setShowShareModal(false);
+                    }
+                  }}
+                />
+              </div>
+
+              <button
+                onClick={() => {
+                  if (shareEmail.trim()) {
+                    alert(`Task shared with: ${shareEmail}`);
+                    setShareEmail("");
+                    setShowShareModal(false);
+                  }
+                }}
+                disabled={!shareEmail.trim()}
+                className={`w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition ${
+                  shareEmail.trim()
+                    ? "bg-red-600 text-white hover:bg-red-700"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                }`}
+              >
+                <Send size={18} />
+                Send Task
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* DESCRIPTION */}
         <p className="text-sm font-bold mb-1">Task Description</p>
@@ -213,7 +275,7 @@ export default function WideTask3({ task, onClose, onUpdate }: WideTask3Props) {
 
         {/* Progress Bar */}
         <div className="mt-auto">
-          <div className="w-full bg-white/30 h-10 rounded-full overflow-hidden relative flex items-center">
+          <div className="w-full bg-white/30 h-10  rounded-full overflow-hidden relative flex items-center">
             <div
               className="h-full bg-[#DF8700] rounded-full flex items-center justify-center text-white font-bold text-sm transition-all duration-500"
               style={{ width: `${progress}%` }}

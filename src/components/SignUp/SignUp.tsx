@@ -6,11 +6,13 @@ import { useNavigate } from "@tanstack/react-router";
 const SignUp = () => {
   const navigate = useNavigate();
 
+  // States
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
+  // Error states
   const [fullNameError, setFullNameError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -18,79 +20,82 @@ const SignUp = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const validateFullName = (name: string) =>
-    !name.trim()
-      ? "Full name is required."
-      : !/^[A-Za-z\s]+$/.test(name)
-      ? "Only letters and spaces allowed."
-      : "";
+  // Validators
+  const validateFullName = (name: string) => {
+    if (!name.trim()) return "Full name is required.";
+    const re = /^[A-Za-z\s]+$/;
+    return re.test(name)
+      ? ""
+      : "Full name must contain only letters and spaces.";
+  };
 
-  const validateEmail = (em: string) =>
-    !em.trim()
-      ? "Email is required."
-      : !/^\S+@\S+\.\S+$/.test(em)
-      ? "Invalid email format."
-      : "";
+  const validateEmail = (em: string) => {
+    if (!em.trim()) return "Email is required.";
+    const re = /^\S+@\S+\.\S+$/;
+    return re.test(em) ? "" : "Invalid email format.";
+  };
 
-  const validatePassword = (pw: string) =>
-    !pw
-      ? "Password is required."
-      : pw.length < 6
-      ? "Password must be at least 6 characters."
-      : "";
+  const validatePassword = (pw: string) => {
+    if (!pw) return "Password is required.";
+    if (pw.length < 6) return "Password must be at least 6 characters.";
+    return "";
+  };
 
+  // Handle sign up
   const handleSignUp = async () => {
-  setServerError("");
-  setSuccessMessage("");
+    setServerError("");
+    setSuccessMessage("");
 
-  const fnErr = validateFullName(fullName);
-  const emErr = validateEmail(email);
-  const pwErr = validatePassword(password);
+    const fnErr = validateFullName(fullName);
+    const emErr = validateEmail(email);
+    const pwErr = validatePassword(password);
 
-  setFullNameError(fnErr);
-  setEmailError(emErr);
-  setPasswordError(pwErr);
+    setFullNameError(fnErr);
+    setEmailError(emErr);
+    setPasswordError(pwErr);
 
-  if (fnErr || emErr || pwErr) return;
+    if (fnErr || emErr || pwErr) return;
 
-  setIsLoading(true);
+    setIsLoading(true);
 
-  try {
-    const res = await fetch("http://localhost:3000/api/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        fullName: fullName.trim(),
-        email: email.trim().toLowerCase(),
-        password: password,
-      }),
-    });
-
-    let data: any = {};
-    const text = await res.text();
     try {
-      data = text ? JSON.parse(text) : {};
-    } catch (e) {
-      console.warn("Response was not valid JSON:", text);
-    }
+      const res = await fetch("http://localhost:3000/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: fullName.trim(),
+          email: email.trim().toLowerCase(),
+          password: password,
+        }),
+      });
 
-    if (res.ok) {
-      setSuccessMessage("Account created successfully!");
+      const text = await res.text();
+      let data: any = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        console.warn("Invalid JSON from backend:", text);
+      }
 
-      // Show success message briefly before redirect
-      setTimeout(() => {
-        navigate({ to: "/" }); // Redirect after 1.2s
-      }, 1200);
-    } else {
-      setServerError(data.error || data.message || `Server error: ${res.status}`);
+      if (res.ok) {
+        setSuccessMessage("Account created successfully!");
+
+        // Redirect after 1.2 seconds
+        setTimeout(() => {
+          navigate({ to: "/signin" });
+        }, 1200);
+      } else {
+        setServerError(
+          data.error || data.message || `Server error: ${res.status}`
+        );
+      }
+    } catch (err: any) {
+      console.error("Network error:", err);
+      setServerError("Failed to connect. Is backend running on port 3000?");
+    } finally {
+      setIsLoading(false);
     }
-  } catch (err: any) {
-    console.error("Network error:", err);
-    setServerError("Failed to connect. Is backend running on port 3000?");
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   return (
     <div className="flex h-screen w-full">
@@ -112,7 +117,8 @@ const SignUp = () => {
             />
           </h3>
           <p className="text-sm opacity-90 mt-2 leading-relaxed">
-            ClassMate helps students organize tasks, manage deadlines, and never miss a class.
+            ClassMate helps students organize tasks, manage deadlines, and never
+            miss a class.
           </p>
           <div className="flex gap-2 mt-4 justify-center">
             <span className="flex items-center gap-2 bg-white/10 border border-white/20 px-3 py-1.5 text-xs rounded-lg backdrop-blur-sm">
@@ -128,6 +134,7 @@ const SignUp = () => {
       {/* RIGHT — FORM */}
       <div className="w-1/2 h-full flex flex-col justify-center px-24 bg-gray-50">
         <img src="/ClassMate.png" alt="Logo" className="w-48 mx-auto mb-8" />
+
         <h2 className="text-4xl font-bold text-center mb-2">Create Account</h2>
         <p className="text-gray-600 text-center mb-8">
           Start organizing your student life
