@@ -19,12 +19,10 @@ export default function MiniCalendar() {
     setCurrentDate(d);
   };
 
-  // CREATE days 1 to 31 (simple static calendar)
   const days = Array.from({ length: 31 }, (_, i) => i + 1);
 
   return (
     <div className="flex flex-col items-center">
-      {/* HEADER */}
       <div className="flex items-center justify-between w-full mb-1">
         <button onClick={prevMonth} className="p-1 hover:bg-gray-100 rounded-full">
           <ChevronLeft size={18} />
@@ -40,37 +38,21 @@ export default function MiniCalendar() {
         </button>
       </div>
 
-      {/* WEEK LABELS */}
-      <div
-        className="
-          grid grid-cols-7 text-center text-xs font-medium text-gray-500 
-          w-full mb-1
-        "
-      >
-        <span>SUN</span>
-        <span>MON</span>
-        <span>TUE</span>
-        <span>WED</span>
-        <span>THU</span>
-        <span>FRI</span>
-        <span>SAT</span>
+      <div className="grid grid-cols-7 text-center text-xs font-medium text-gray-500 w-full mb-1">
+        <span>SUN</span><span>MON</span><span>TUE</span>
+        <span>WED</span><span>THU</span><span>FRI</span><span>SAT</span>
       </div>
 
-      {/* DAYS GRID */}
       <div className="grid grid-cols-7 gap-1 w-full ml-7">
         {days.map((day) => {
-          const isActive = day === 15; // sample highlighted day
+          const isActive = day === 15;
 
           return (
             <button
               key={day}
-              className={`
-                w-8 h-8 flex items-center justify-center
-                rounded-full text-xs
-                ${isActive 
-                  ? "bg-[#CFA34A] text-white shadow-md" 
-                  : "bg-black text-white bg-opacity-90"}
-              `}
+              className={`calendar-day ${
+                isActive ? "calendar-day-active" : "calendar-day-default"
+              }`}
             >
               {day}
             </button>

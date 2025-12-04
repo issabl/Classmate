@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
-import { Moon } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 
 interface MoonButtonProps {
   notificationsOpen: boolean;
 }
 
 export default function MoonButton({ notificationsOpen }: MoonButtonProps) {
-  // Initialize dark mode from localStorage
   const [darkMode, setDarkMode] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("darkMode") === "true";
@@ -14,7 +13,6 @@ export default function MoonButton({ notificationsOpen }: MoonButtonProps) {
     return false;
   });
 
-  // Apply dark class and save preference
   useEffect(() => {
     const html = document.documentElement;
     if (darkMode) {
@@ -22,21 +20,19 @@ export default function MoonButton({ notificationsOpen }: MoonButtonProps) {
     } else {
       html.classList.remove("dark");
     }
-    localStorage.setItem("darkMode", darkMode.toString());
+    localStorage.setItem("darkMode", String(darkMode));
   }, [darkMode]);
 
   return (
     <button
-      className={`
-        ${notificationsOpen ? "backdrop-blur-sm bg-white/50" : ""} 
-        hover:opacity-70 transition px-2 py-1 rounded
-      `}
+      className="transition px-2 py-1 rounded"
       onClick={() => setDarkMode(!darkMode)}
     >
-      <Moon
-        className={`${darkMode ? "text-yellow-400" : "text-black dark:text-white"}`}
-        size={20}
-      />
+      {darkMode ? (
+        <Sun size={20} className="text-yellow-400" />  // shows Sun in dark mode
+      ) : (
+        <Moon size={20} className="text-black" />      // shows Moon in light mode
+      )}
     </button>
   );
 }

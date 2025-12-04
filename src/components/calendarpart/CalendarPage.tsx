@@ -7,7 +7,7 @@ import LeftTaskSection from "./LeftTaskSection";;
 
 export default function CalendarPage() {
   return (
-    <div className="flex h-screen w-full bg-[#E7E7E7]">
+    <div className="flex h-screen w-full home container">
       <Sidebar />
 
       <WhiteContainer>

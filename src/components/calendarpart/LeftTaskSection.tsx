@@ -4,131 +4,71 @@ import { useState } from "react";
 export default function LeftTaskSection() {
   const [selectedMonth, setSelectedMonth] = useState("September 2024");
 
-  const [priority, setPriority] = useState<"low" | "med" | "high" | null>(null);
+  // 🔥 MANUAL SETTINGS
+  const taskCardHeight = "80px"; // <-- adjust task card height manually
 
   const months = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December",
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December",
   ];
-  const years = [2024, 2025, 2026, 2027];
+  const years = [2024,2025,2026,2027];
+
+  const tasks = [
+    { date: "Sep 15", title: "Database Management System", desc: "Hands on using XAMPP." },
+    { date: "Sep 17", title: "Networking", desc: "Transferring files from one computer to another, hands on activity." },
+    { date: "Sep 17", title: "Functional English", desc: "Quiz Bee by group." },
+    { date: "Sep 20", title: "Application Development", desc: "Refer to your pair groupings on your HCI." }
+  ];
 
   return (
-    <div
-      className="
-        bg-[#F8F8F8] rounded-3xl
-        shadow-[inset_0_0_15px_rgba(0,0,0,0.08)]
-        p-6
-        w-[610px]
-        h-[580px]
-        ml-[27px]
-      "
-    >
-
-      {/* MONTH + PRIORITY BUTTONS */}
-      <div className="flex items-center justify-between mb-6">
-
-        {/* MONTH DROPDOWN */}
-        <div className="relative">
-          <select
-            className="appearance-none bg-transparent text-2xl font-bold pr-8"
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-          >
-            {years.map((year) =>
-              months.map((month) => (
-                <option key={`${month} ${year}`} value={`${month} ${year}`}>
-                  {month} {year}
-                </option>
-              ))
-            )}
-          </select>
-
-          <ChevronDown
-            size={22}
-            className="absolute right-2 top-1 text-gray-700 pointer-events-none"
-          />
-        </div>
-
-        {/* PRIORITY BUTTONS */}
-        <div className="flex gap-2">
-          <button
-            onClick={() => setPriority("low")}
-            className={`
-              px-3 py-1 rounded-full text-sm border 
-              ${priority === "low" ? "bg-green-200 border-green-400" : "bg-white border-gray-300"}
-            `}
-          >
-            Low
-          </button>
-
-          <button
-            onClick={() => setPriority("med")}
-            className={`
-              px-3 py-1 rounded-full text-sm border 
-              ${priority === "med" ? "bg-violet-200 border-violet-400" : "bg-white border-gray-300"}
-            `}
-          >
-            Med
-          </button>
-
-          <button
-            onClick={() => setPriority("high")}
-            className={`
-              px-3 py-1 rounded-full text-sm border 
-              ${priority === "high" ? "bg-red-200 border-red-400" : "bg-white border-gray-300"}
-            `}
-          >
-            High
-          </button>
-        </div>
+    <div className="left-task-section shadow-[inset_0_0_15px_rgba(0,0,0,0.08)] rounded-2xl p-5 flex flex-col">
+      
+      {/* MONTH HEADER */}
+      <div className="flex items-center justify-between mb-6 relative">
+        <select
+          value={selectedMonth}
+          onChange={(e) => setSelectedMonth(e.target.value)}
+          className="appearance-none bg-transparent pr-6 text-sm outline-none text-gray-900 dark:text-white"
+        >
+          {years.map((year) =>
+            months.map((month) => (
+              <option key={`${month} ${year}`} value={`${month} ${year}`}>
+                {month} {year}
+              </option>
+            ))
+          )}
+        </select>
+        <ChevronDown
+          size={22}
+          className="absolute right-2 top-1 pointer-events-none text-gray-700 dark:text-gray-300"
+        />
       </div>
 
-      {/* -------------------- TASK ITEM 1 -------------------- */}
-      <div className="mb-2">
-        <button className="text-xs border border-gray-300 px-3 py-1 rounded-full mb-1 text-gray-700">
-          Sep 15
-        </button>
+      {/* TASK ITEMS */}
+      {tasks.map((task, i) => (
+        <div key={i} className="mb-3">
+          {/* Date button */}
+          <button className="task-date text-xs px-3 py-1 rounded-full bg-[#Fffff] dark:bg-[#2B231B] text-gray-900 dark:text-white">
+            {task.date}
+          </button>
 
-        <div className="bg-white rounded-xl shadow-[0_3px_10px_rgba(0,0,0,0.08)] p-4 border border-gray-100">
-          <p className="font-semibold text-gray-900">Database Management System</p>
-          <p className="text-sm text-gray-600 mt-1">Hands on using XAMPP.</p>
-        </div>
-      </div>
-
-      {/* -------------------- TASK ITEM 2 -------------------- */}
-      <div className="mb-2">
-        <button className="text-xs border border-gray-300 px-3 py-1 rounded-full mb-1 text-gray-700">
-          Sep 17
-        </button>
-
-        <div className="bg-white rounded-xl shadow-[0_3px_10px_rgba(0,0,0,0.08)] p-4 border border-gray-100">
-          <p className="font-semibold text-gray-900">Networking</p>
-          <p className="text-sm text-gray-600 mt-1">
-            Transferring files from one computer to another, hands on activity.
-          </p>
-
-          <div className="mt-4 bg-white rounded-xl shadow-[0_3px_10px_rgba(0,0,0,0.08)] p-4 border border-gray-100">
-            <p className="font-semibold text-gray-900">Functional English</p>
-            <p className="text-sm text-gray-600 mt-1">Quiz Bee by group.</p>
+          {/* Task card */}
+          <div
+            className="task-card shadow-[0_3px_10px_rgba(0,0,0,0.08)] rounded-xl p-3 mt-1"
+            style={{ height: taskCardHeight }}
+          >
+            <p className="title text-sm font-semibold text-gray-900 dark:text-white">
+              {task.title}
+            </p>
+            <p className="desc text-xs opacity-70 dark:text-gray-300">
+              {task.desc}
+            </p>
           </div>
         </div>
-      </div>
+      ))}
 
-      {/* -------------------- TASK ITEM 3 -------------------- */}
-      <div className="mb-4">
-        <button className="text-xs border border-gray-300 px-3 py-1 rounded-full mb-3 text-gray-700">
-          Sep 20
-        </button>
-
-        <div className="bg-white rounded-xl shadow-[0_3px_10px_rgba(0,0,0,0.08)] p-4 border border-gray-100">
-          <p className="font-semibold text-gray-900">Application Development</p>
-          <p className="text-sm text-gray-600 mt-1">
-            Refer to your pair groupings on your HCI.
-          </p>
-        </div>
-      </div>
-
-      <p className="text-center text-m -mt-1 font-semibold text-[#D7A878]">
+      {/* Footer */}
+      <p className="footer text-center mt-auto text-[11px] opacity-60 dark:text-gray-400">
         ClassMate
       </p>
     </div>
