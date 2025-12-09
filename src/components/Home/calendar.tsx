@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useRouter } from "@tanstack/react-router";   // ONLY THIS ONE
+import { useRouter } from "@tanstack/react-router"; // TANSTACK ONLY
 
 const Calendar = () => {
   const today = new Date();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showYears, setShowYears] = useState(false);
 
-  const router = useRouter();   // TANSTACK ONLY
+  const router = useRouter(); // TANSTACK ONLY
 
   const year = currentDate.getFullYear();
   const month = currentDate.toLocaleString("default", { month: "long" });
@@ -28,16 +28,18 @@ const Calendar = () => {
     setShowYears(false);
   };
 
-  // TANSTACK NAVIGATE — 100% CORRECT
   const handleDateDoubleTap = (day: number) => {
-    const selectedDate = new Date(year, currentDate.getMonth(), day);
-    const formatted = selectedDate.toLocaleDateString("en-GB"); // DD/MM/YYYY
+  const selectedDate = new Date(year, currentDate.getMonth(), day);
+  const formatted = selectedDate.toLocaleDateString("en-GB"); // DD/MM/YYYY
 
-    router.navigate({
-      to: "/add-task",
-      state: { selectedDate: formatted }
-    });
-  };
+  router.navigate({
+    to: '/add-task',
+    search: { date: formatted } // fix: no prev
+  });
+};
+
+
+
 
   const calendarWidth = 360;
   const calendarHeight = 250;
@@ -46,7 +48,10 @@ const Calendar = () => {
   const daySize = Math.min(22, availableHeight / totalRows);
 
   return (
-    <div className="absolute" style={{ top: 79, left: 1070, width: calendarWidth, height: calendarHeight, fontFamily: "SF PRO" }}>
+    <div
+      className="absolute"
+      style={{ top: 79, left: 1070, width: calendarWidth, height: calendarHeight, fontFamily: "SF PRO" }}
+    >
       <div className="bg-[#F8F8F8] rounded-2xl shadow-xl p-4 w-full h-full">
         {/* Header */}
         <div className="flex justify-between items-center mb-3 -mt-1">
@@ -57,10 +62,15 @@ const Calendar = () => {
           <div className="relative text-center">
             <button onClick={() => setShowYears(!showYears)} className="text-xs w-full">{year}</button>
             <p className="text-l font-semibold">{month}</p>
+
             {showYears && (
-              <div className="absolute top-7 left-1/2 -translate-x-1/2 bg-white shadow-lg rounded-xl p-2 w-20 z-10">
+              <div className="absolute top-7 left-1/2 -translate-x-1/2 bg-white dark:bg-[#160F0A] shadow-lg rounded-xl p-2 w-20 z-10">
                 {[2024, 2025, 2026].map((y) => (
-                  <button key={y} onClick={() => changeYear(y)} className="w-full py-1 hover:bg-gray-100 rounded-lg text-sm">
+                  <button
+                    key={y}
+                    onClick={() => changeYear(y)}
+                    className="w-full py-1 hover:bg-gray-100 dark:hover:bg-[#2A1F14] rounded-lg text-sm"
+                  >
                     {y}
                   </button>
                 ))}
@@ -75,28 +85,40 @@ const Calendar = () => {
 
         {/* Days of week */}
         <div className="grid grid-cols-7 text-center text-[11px] text-gray-400 -mt-2">
-          <p>SUN</p><p>MON</p><p>TUE</p><p>WED</p><p>THU</p><p>FRI</p><p>SAT</p>
+          <p>SUN</p>
+          <p>MON</p>
+          <p>TUE</p>
+          <p>WED</p>
+          <p>THU</p>
+          <p>FRI</p>
+          <p>SAT</p>
         </div>
 
         {/* Calendar Grid */}
-        <div className="grid grid-cols-7 text-center gap-1.5 ml-3.5">
+        <div className="grid grid-cols-7 text-center gap-1.5 mt-2">
+          {/* Previous month */}
           {prevMonthDays.map((day, i) => (
-            <div key={`prev-${i}`} className="flex items-center justify-center rounded-full border border-black text-black" style={{ width: daySize, height: daySize, fontSize: 12 }}>
+            <div
+              key={`prev-${i}`}
+              className="flex items-center justify-center rounded-full text-gray-400"
+              style={{ width: daySize, height: daySize, fontSize: 12 }}
+            >
               {day}
             </div>
           ))}
 
+          {/* Current month */}
           {daysArray.map((day) => {
-            const isToday = day === today.getDate() && currentDate.getMonth() === today.getMonth() && currentDate.getFullYear() === today.getFullYear();
-            const circleStyle = isToday
-              ? { backgroundColor: "#D8A75B", color: "black", boxShadow: "inset 0 0 4px rgba(0,0,0,0.3)" }
-              : { backgroundColor: "#000", color: "white" };
+            const isToday =
+              day === today.getDate() &&
+              currentDate.getMonth() === today.getMonth() &&
+              currentDate.getFullYear() === today.getFullYear();
 
             return (
               <div
                 key={day}
-                className="flex items-center justify-center rounded-full cursor-pointer transition-all hover:scale-110 active:scale-95"
-                style={{ width: daySize, height: daySize, ...circleStyle, fontSize: 12 }}
+                className={`flex items-center justify-center rounded-full cursor-pointer transition-all hover:scale-110 active:scale-95 ${isToday ? "bg-[#D8A75B] text-black" : "bg-black text-white"}`}
+                style={{ width: daySize, height: daySize, fontSize: 12 }}
                 onDoubleClick={() => handleDateDoubleTap(day)}
               >
                 {day}
@@ -104,8 +126,13 @@ const Calendar = () => {
             );
           })}
 
+          {/* Next month */}
           {nextMonthDays.map((day, i) => (
-            <div key={`next-${i}`} className="flex items-center justify-center rounded-full border border-black text-black" style={{ width: daySize, height: daySize, fontSize: 12 }}>
+            <div
+              key={`next-${i}`}
+              className="flex items-center justify-center rounded-full text-gray-400"
+              style={{ width: daySize, height: daySize, fontSize: 12 }}
+            >
               {day}
             </div>
           ))}

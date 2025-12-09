@@ -82,7 +82,7 @@ const SignUp = () => {
 
         // Redirect after 1.2 seconds
         setTimeout(() => {
-          navigate({ to: "/signin" });
+          navigate({ to: "/" });
         }, 1200);
       } else {
         setServerError(
@@ -253,7 +253,7 @@ const SignUp = () => {
         <div className="text-center mt-8 text-gray-600">
           Already have an account?{" "}
           <button
-            onClick={() => navigate({ to: "/signin" })}
+            onClick={() => navigate({ to: "/" })}
             className="font-bold text-amber-700 hover:underline"
           >
             Sign in

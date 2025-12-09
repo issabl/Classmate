@@ -5,19 +5,47 @@ import { Calendar, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export default function TaskSection() {
+  // === TASK STATES ===
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [startTime, setStartTime] = useState("09:00 AM");
+  const [endTime, setEndTime] = useState("05:00 PM");
+  const [priority, setPriority] = useState<"Low" | "Med" | "High">("Med");
+  const [showStartCal, setShowStartCal] = useState(false);
+  const [showEndCal, setShowEndCal] = useState(false);
+
   // === INVITE MEMBERS STATES & FUNCTIONS ===
   const [emailInput, setEmailInput] = useState("");
-  const [members, setMembers] = useState([
-    { email: "novinmae@gmail.com", name: "Novin Mae Aguilar", avatar: "/person1.png" },
-    { email: "maryjane@gmail.com", name: "Mary Jane Pogoy", avatar: "/person2.png" }
-  ]);
+  const [members, setMembers] = useState<{ email: string; name: string; avatar: string }[]>([]);
+  const [registeredUsers, setRegisteredUsers] = useState<Record<string, { name: string; avatar: string }>>({});
+  const [loadingUsers, setLoadingUsers] = useState(true);
+  const [error, setError] = useState("");
 
-  const registeredUsers: Record<string, { name: string; avatar: string }> = {
-    "novinmae@gmail.com": { name: "Novin Mae Aguilar", avatar: "/person1.png" },
-    "maryjane@gmail.com": { name: "Mary Jane Pogoy", avatar: "/person2.png" },
-    "juan@example.com": { name: "Juan Dela Cruz", avatar: "/person3.png" },
-    "princess@gmail.com": { name: "Princess Petancio", avatar: "/person4.png" }
-  };
+  // Fetch registered users for dropdown/invites
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch('/api/users');
+        if (!response.ok) throw new Error('Failed to fetch users');
+        const users = await response.json();
+        const userMap = users.reduce((acc: Record<string, { name: string; avatar: string }>, user: { user_id: number; full_name: string; email: string; profile_picture_url?: string }) => {
+          acc[user.email.toLowerCase()] = {
+            name: user.full_name,
+            avatar: user.profile_picture_url || '/default-avatar.png'  // Fallback avatar
+          };
+          return acc;
+        }, {});
+        setRegisteredUsers(userMap);
+        setLoadingUsers(false);
+      } catch (err) {
+        setError('Failed to load registered users');
+        setLoadingUsers(false);
+      }
+    };
+    fetchUsers();
+  }, []);
 
   const handleAddMember = () => {
     const email = emailInput.trim().toLowerCase();
@@ -41,15 +69,109 @@ export default function TaskSection() {
     setMembers(prev => prev.filter(m => m.email !== email));
   };
 
-  // === TASK STATES ===
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [startTime, setStartTime] = useState("09:00 AM");
-  const [endTime, setEndTime] = useState("05:00 PM");
-  const [priority, setPriority] = useState<"Low" | "Med" | "High">("Med");
-  const [showStartCal, setShowStartCal] = useState(false);
-  const [showEndCal, setShowEndCal] = useState(false);
+ // === UPDATED SUBMIT HANDLER ===
+const handleSubmit = async () => {
+  console.log('Button clicked! Starting submit...');
 
+  // Enhanced validation
+  if (!title.trim() || !description.trim() || !startDate || !endDate) {
+    alert("Please fill all required fields (title, description, dates).");
+    return;
+  }
+  if (new Date(endDate.split('/').reverse().join('-')) < new Date(startDate.split('/').reverse().join('-'))) {
+    alert("End date must be after start date.");
+    return;
+  }
+  console.log('Validation passed!');
+
+  const inviteEmails = members.map(m => m.email);
+  console.log('Invite emails:', inviteEmails);
+
+  // Convert dates to ISO (YYYY-MM-DD) for server compatibility
+  const parseDateToISO = (dateStr: string): string => {
+    if (!dateStr) return '';
+    const [d, m, y] = dateStr.split('/').map(Number);
+    const fullYear = y < 50 ? 2000 + y : 1900 + y; // Handle YY -> YYYY
+    return `${fullYear}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+  };
+  const startDateISO = parseDateToISO(startDate);
+  const endDateISO = parseDateToISO(endDate);
+
+  // Convert times to 24hr format (e.g., "09:00" without AM/PM)
+  const parseTimeTo24hr = (timeStr: string): string => {
+    if (!timeStr) return '';
+    const [time, period] = timeStr.split(' ');
+    let [hours, minutes] = time.split(':').map(Number);
+    if (period === 'PM' && hours !== 12) hours += 12;
+    if (period === 'AM' && hours === 12) hours = 0;
+    return `${String(hours).padStart(2, '0')}:${String(minutes || 0).padStart(2, '0')}`;
+  };
+  const startTime24 = parseTimeTo24hr(startTime);
+  const endTime24 = parseTimeTo24hr(endTime);
+
+  // Map priority to a common server format (adjust if your server uses numbers/enums)
+  const priorityMap: Record<string, string | number> = { Low: 'low', Med: 'medium', High: 'high' };
+  const serverPriority = priorityMap[priority] || priority;
+
+  // Add creator/user_id if available (e.g., from localStorage or context)
+  // Assuming you have a user session; replace with your auth logic
+  const userId = localStorage.getItem('userId') || '1'; // Fallback for testing; get real ID
+
+  const formData = {
+  title: title.trim(),
+  description: description.trim(),
+  startDate: startDateISO,
+  startTime: startTime24,
+  endDate: endDateISO,
+  endTime: endTime24,
+  priority: serverPriority,
+  memberEmails: inviteEmails,
+  creatorId: userId,
+};
+
+  console.log('Form data prepared:', formData);
+
+  // Use relative URL for dev/prod consistency (avoids CORS/400)
+  const url = '/api/tasks'; // Changed from full localhost
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        // Add auth if needed (e.g., Bearer token or cookie is auto-sent in same-origin)
+        // 'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify(formData),
+    });
+
+    console.log('Response status:', response.status);
+    
+    // Log full response body for server error details
+    const responseBody = await response.text();
+    
+    if (!response.ok) {
+      let errorMsg = `HTTP ${response.status}: ${response.statusText}`;
+      try {
+        const parsed = JSON.parse(responseBody);
+        errorMsg += ` - Server says: ${parsed.error || parsed.message || 'Unknown error'}`;
+      } catch {} // Ignore parse errors
+      
+    }
+
+    const data = JSON.parse(responseBody); // Parse if not already
+    if (data.error) {
+      alert('Error: ' + data.error);
+    } else {
+      alert('Task created successfully! ID: ' + data.taskId);
+      // Clear form
+      setTitle(''); setDescription(''); setStartDate(''); setEndDate(''); 
+      setStartTime('09:00 AM'); setEndTime('05:00 PM'); setPriority('Med'); setMembers([]);
+    }
+  } catch (err) {
+    alert('Failed to create task: ' );
+  }
+};
   const formatDate = (date: Date) => {
     const d = date.getDate().toString().padStart(2, "0");
     const m = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -133,11 +255,22 @@ export default function TaskSection() {
 
             {/* TASK TITLE */}
             <label className="block text-base font-semibold mb-1.5">Task Title</label>
-            <input type="text" placeholder="Enter task title" className="w-[60%] bg-[#F0F0F0] rounded-lg px-3 py-2.5 mb-4 outline-none text-gray-700 text-sm" />
+            <input 
+              type="text" 
+              placeholder="Enter task title" 
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-[60%] bg-[#F0F0F0] rounded-lg px-3 py-2.5 mb-4 outline-none text-gray-700 text-sm" 
+            />
 
             {/* DESCRIPTION */}
             <label className="block text-base font-semibold mb-1.5">Description</label>
-            <textarea placeholder="Enter task description" className="w-[70%] bg-[#F0F0F0] rounded-lg px-3 py-2.5 h-28 mb-6 outline-none text-gray-700 text-sm resize-none" />
+            <textarea 
+              placeholder="Enter task description" 
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-[70%] bg-[#F0F0F0] rounded-lg px-3 py-2.5 h-28 mb-6 outline-none text-gray-700 text-sm resize-none" 
+            />
 
             <div className="flex items-start gap-15">
 
@@ -218,19 +351,25 @@ export default function TaskSection() {
                   </div>
 
                   <div className="flex flex-col gap-1.5 max-h-48 overflow-y-auto">
-                    {members.map((member) => (
-                      <div key={member.email} className="bg-white rounded-lg px-2.5 py-1.5 flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-2">
-                          <img src={member.avatar} alt={member.name} className="w-6 h-6 rounded-full object-cover" />
-                          <span className="text-gray-800 font-medium">{member.name}</span>
+                    {loadingUsers ? (
+                      <p className="text-white text-xs text-center py-2">Loading users...</p>
+                    ) : error ? (
+                      <p className="text-white text-xs text-center py-2">Error: {error}</p>
+                    ) : members.length === 0 ? (
+                      <p className="text-white text-xs text-center py-2">No members added yet</p>
+                    ) : (
+                      members.map((member) => (
+                        <div key={member.email} className="bg-white rounded-lg px-2.5 py-1.5 flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-2">
+                            <img src={member.avatar} alt={member.name} className="w-6 h-6 rounded-full object-cover" />
+                            <span className="text-gray-800 font-medium">{member.name}</span>
+                          </div>
+                          <button onClick={() => removeMember(member.email)} className="text-gray-500 hover:text-red-600 transition">
+                            <X size={18} />
+                          </button>
                         </div>
-                        <button onClick={() => removeMember(member.email)} className="text-gray-500 hover:text-red-600 transition">
-                          <X size={18} />
-                        </button>
-                      </div>
-                    ))}
-                    {members.length === 0 && <p className="text-white text-xs text-center py-2">No members added yet</p>}
-                    
+                      ))
+                    )}
                   </div>
                 </div>
               </div>
@@ -238,7 +377,7 @@ export default function TaskSection() {
 
             {/* ADD TASK BUTTON */}
             <div className="mt-8 text-center">
-              <button className="bg-[#5F3B00] text-white rounded-full px-8 py-3 font-semibold text-base hover:bg-[#4a2f00] transition shadow-lg">
+              <button onClick={handleSubmit} className="bg-[#5F3B00] text-white rounded-full px-8 py-3 font-semibold text-base hover:bg-[#4a2f00] transition shadow-lg">
                 Add a task
               </button>
             </div>

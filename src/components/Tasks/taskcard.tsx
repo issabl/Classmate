@@ -13,19 +13,8 @@ interface Task {
   checklist: { id: number; text: string; done: boolean }[];
   color: string;
   icon: string;
-}
-
-interface Task {
-  id: number;
-  title: string;
-  startTime: string;
-  endTime: string;
-  description: string;
-  checklist: { id: number; text: string; done: boolean }[];
-  color: string;
-  icon: string;
-  isCompleted?: boolean;        // NEW: Track if completed
-  completedAt?: string;         // Optional: When it was completed
+  isCompleted?: boolean;
+  completedAt?: string;
 }
 
 export default function TaskCards() {
@@ -70,7 +59,6 @@ export default function TaskCards() {
 
   const [openTaskId, setOpenTaskId] = useState<number | null>(null);
 
-  // Helper: Calculate duration
   const calculateDuration = (start: string, end: string): string => {
     const toMinutes = (t: string) => {
       const [time, period] = t.split(" ");
@@ -88,97 +76,72 @@ export default function TaskCards() {
     return `${hours}h ${mins}m`;
   };
 
-  // Update task (called from WideTask1)
-  const updateTask = (updatedTask: Task) => {
-    setTasks(tasks.map(t => t.id === updatedTask.id ? updatedTask : t));
-  };
-
   const getProgress = (checklist: Task["checklist"]) => {
     if (checklist.length === 0) return 0;
     return Math.round((checklist.filter(i => i.done).length / checklist.length) * 100);
   };
 
+  const updateTask = (updatedTask: Task) => {
+    setTasks(tasks.map(t => t.id === updatedTask.id ? updatedTask : t));
+  };
+
   return (
     <>
       <div className="flex gap-5 p-2 -mt-4 ml-2">
-        {tasks.map((task) => {
-  const progress = getProgress(task.checklist);
-  const duration = calculateDuration(task.startTime, task.endTime);
+        {tasks.map(task => {
+          const progress = getProgress(task.checklist);
+          const duration = calculateDuration(task.startTime, task.endTime);
 
-  return (
-    <div
-      key={task.id}
-      className="w-[235px] h-[290px] bg-white rounded-3xl shadow-[0_4px_17px_rgba(0,0,0,0.20)] p-4 cursor-pointer transition-all hover:scale-105 flex flex-col justify-between"
-      onClick={() => setOpenTaskId(task.id)}
-    >
-      {/* TOP PART — EXACT SAME */}
-      <div>
-        <div className={`${task.color} h-20 rounded-2xl relative flex items-center justify-center gap-2 px-4 text-white font-semibold text-[16px] overflow-hidden`}>
-          <Maximize2
-            className="absolute top-2 right-2 h-5 w-5 cursor-pointer z-10"
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpenTaskId(task.id);
-            }}
-          />
-          <img src={task.icon} className="h-20 w-auto -ml-4" alt="" />
-          <span className="text-shadow">{task.title}</span>
-        </div>
+          return (
+            <div
+              key={task.id}
+              className="w-[235px] h-[290px] bg-white rounded-3xl shadow-[0_4px_17px_rgba(0,0,0,0.20)] p-4 cursor-pointer transition-all hover:scale-105 flex flex-col justify-between"
+              onClick={() => setOpenTaskId(task.id)}
+            >
+              <div>
+                <div className={`${task.color} h-20 rounded-2xl relative flex items-center justify-center gap-2 px-4 text-white font-semibold text-[16px] overflow-hidden`}>
+                  <Maximize2
+                    className="absolute top-2 right-2 h-5 w-5 cursor-pointer z-10"
+                    onClick={e => {
+                      e.stopPropagation();
+                      setOpenTaskId(task.id);
+                    }}
+                  />
+                  <img src={task.icon} className="h-20 w-auto -ml-4" alt="" />
+                  <span className="text-shadow">{task.title}</span>
+                </div>
 
-        <div className="mt-2 text-center text-[13px] font-medium">
-          <p>{task.startTime} — {task.endTime}</p>
-          <p className="text-xs opacity-70">Start &nbsp; End</p>
-        </div>
+                <div className="mt-2 text-center text-[13px] font-medium">
+                  <p>{task.startTime} — {task.endTime}</p>
+                  <p className="text-xs opacity-70">Start &nbsp; End</p>
+                </div>
 
-        {/* DESCRIPTION — SAME 3 LINES, NO EXTRA SPACE */}
-        <p className="text-center mt-1 text-[10px] text-gray-700 leading-tight line-clamp-3 px-2 min-h-[3.2em]">
-          {task.description || "No description"}
-        </p>
+                <p className="text-center mt-1 text-[10px] text-gray-700 leading-tight line-clamp-3 px-2 min-h-[3.2em]">
+                  {task.description || "No description"}
+                </p>
 
-        {/* PROGRESS BAR — SAME DESIGN, SAME MARGIN */}
-        <div className="mt-4 w-full bg-gray-200 h-4 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-r from-orange-400 to-yellow-500 flex items-center justify-center text-[10px] text-white font-bold transition-all duration-500"
-            style={{ width: `${progress}%` }}
-          >
-            {progress > 15 && `${progress}%`}
-          </div>
-        </div>
+                <div className="mt-4 w-full bg-gray-200 h-4 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-orange-400 to-yellow-500 flex items-center justify-center text-[10px] text-white font-bold transition-all duration-500"
+                    style={{ width: `${progress}%` }}
+                  >
+                    {progress > 15 && `${progress}%`}
+                  </div>
+                </div>
+
+                <div className="mt-4 bg-[#7D5414] text-[#FBC46E] py-2 rounded-full text-center text-sm font-medium">
+                  {duration}
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
-      {/* BOTTOM — DURATION BADGE, EXACT SAME SIZE & SPACING */}
-      <div className="mt-4">
-        <div className="bg-gradient-to-r from-[#7D5414] to-[#A6731A] text-[#FFE4A1] py-2 rounded-full text-center text-sm font-bold shadow-md">
-          {duration}
-        </div>
-      </div>
-    </div>
-  );
-})}
-      </div>
-
-      {/* MODALS — PASS TASK DATA + UPDATE FUNCTION */}
-      {openTaskId === 1 && (
-        <WideTask1
-          task={tasks.find(t => t.id === 1)!}
-          onClose={() => setOpenTaskId(null)}
-          onUpdate={updateTask}
-        />
-      )}
-      {openTaskId === 2 && (
-        <WideTask2
-          task={tasks.find(t => t.id === 2)!}
-          onClose={() => setOpenTaskId(null)}
-          onUpdate={updateTask}
-        />
-      )}
-      {openTaskId === 3 && (
-        <WideTask3
-          task={tasks.find(t => t.id === 3)!}
-          onClose={() => setOpenTaskId(null)}
-          onUpdate={updateTask}
-        />
-      )}
+      {/* MODALS */}
+      {openTaskId === 1 && <WideTask1 task={tasks.find(t => t.id === 1)!} onClose={() => setOpenTaskId(null)} onUpdate={updateTask} />}
+      {openTaskId === 2 && <WideTask2 task={tasks.find(t => t.id === 2)!} onClose={() => setOpenTaskId(null)} onUpdate={updateTask} />}
+      {openTaskId === 3 && <WideTask3 task={tasks.find(t => t.id === 3)!} onClose={() => setOpenTaskId(null)} onUpdate={updateTask} />}
     </>
   );
 }
