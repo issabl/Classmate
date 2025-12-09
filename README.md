@@ -1,9 +1,10 @@
 CLASSMATE – Student Task Scheduler Application
 ============================================================================================================
 ClassMate is a responsive web and mobile-friendly task scheduler application designed to help students stay organized, productive, and updated with their academic responsibilities. It allows users to track assignments, upcoming deadlines, projects, group tasks, and notifications—all in one streamlined platform.
-
 This system serves as a digital companion for learners, helping them manage tasks, collaborate with teammates, and visualize upcoming work with ease.
+
 =============================================================================================================
+
 👥 PROJECT TEAM 
 TEAM LEADER: Niña Issabela S. Olasiman
 MEMBERS: 
@@ -14,6 +15,7 @@ Kent Donal
 Jo Marie Academia 
 Ralph Justine Mamac
 ============================================================================================================
+
 🌟 SYSTEM FEATURES
 • User Sign Up / Login 
 • Add, edit, delete tasks 
@@ -24,6 +26,7 @@ Ralph Justine Mamac
 • Responsive (works on mobile & desktop) 
 • Clean and student-friendly UI
 =============================================================================================================
+
 HOW TO USE THE SYSTEM (Step-by-Step Guide) 
 
 1️⃣ Sign Up / Create an Account 
@@ -60,6 +63,7 @@ Team invites
 Completed tasks 
 Task updates
 ====================================================================================================================
+
 EXAMPLE INPUTS FOR TRANSACTIONS
 User Registration 
 Full Name: Princess Pentancio 
