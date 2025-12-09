@@ -1,73 +1,116 @@
-# React + TypeScript + Vite
+CLASSMATE – Student Task Scheduler Application
+===========================================================
+ClassMate is a responsive web and mobile-friendly task scheduler application designed to help students stay organized, productive, and updated with their academic responsibilities.
+It allows users to track assignments, upcoming deadlines, projects, group tasks, and notifications—all in one streamlined platform.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This system serves as a digital companion for learners, helping them manage tasks, collaborate with teammates, and visualize upcoming work with ease.
+============================================================
+👥 PROJECT TEAM
+TEAM LEADER:
+Niña Issabela S. Olasiman
 
-Currently, two official plugins are available:
+MEMBERS:
+Princess Pentancio
+Mary Rose Pogoy
+Durf Aguilar
+Kent Donal
+Jo Marie Academia
+Ralph Justine Mamac
+============================================================
+🌟 SYSTEM FEATURES
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+• User Sign Up / Login
+• Add, edit, delete tasks
+• Task categories: Upcoming & Completed
+• Set due date and time
+• Add team members to tasks
+• Real-time notifications
+• Responsive (works on mobile & desktop)
+• Clean and student-friendly UI
+===========================================================
 
-## React Compiler
+HOW TO USE THE SYSTEM (Step-by-Step Guide)
+1️⃣ Sign Up / Create an Account
+Enter your full name, email, and password
+Log in to access your dashboard
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+2️⃣ View Dashboard
+You will see:
+Upcoming tasks
+Completed tasks
+Calendar
+Notifications
 
-## Expanding the ESLint configuration
+3️⃣ Add a Task
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Click Add Task button
+Fill in:
+Task title
+Description
+Due date & time
+Priority level
+Add team members (optional)
+Submit to save task
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+4️⃣ Manage Your Tasks
+View tasks by category (Upcoming / Completed)
+Edit or delete tasks
+Mark tasks as Done
+5️⃣ Team Collaboration
+Search and add team members
+Members must be registered users in the database
+Assign tasks to multiple members
+6️⃣ View Notifications
+You will receive alerts for:
+Tasks nearing deadline
+Team invites
+Completed tasks
+Task updates
+==============================================================================
+EXAMPLE INPUTS FOR TRANSACTIONS
+1. User Registration
+Full Name: Princess Pentancio
+Email: princess.a.petancio@gmail.com
+Password: princess123
+Confirm Password: princess123
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+2. User Login
+Email: princess.a.petancio@gmail.com
+Password: princess123
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+3. Create a New Task
+Task Title: Research Paper Draft
+Description: Write the first draft for our "Global Warming Impact" research paper.
+Due Date: 2025-12-10
+Due Time: 17:00
+Priority: High
+Add Members: kent@gmail.com, maryrose@gmail.com
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+4. Completed Task Sample
+Task Title: Math Assignment #4
+Completed On: 2025-12-03
+Remarks: All items encoded and double-checked.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+5. Adding Team Members
+Search User: durf@gmail.com
+Add to Task: Research Paper Draft
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+6. Editing an Existing Task
+Old Task Title: Group PowerPoint Presentation
+New Task Title: Group PowerPoint Presentation (Final)
+Updated Due Date: 2025-12-08, 15:00
+
+7. Notification Examples
+• "Task Reminder: Research Paper Draft is due in 24 hours."
+• "New Team Invite: Niña added you to 'Case Study Analysis'."
+• "Task Completed: Mary Rose completed 'Math Assignment #4'."
+
+8. Sample Database Record (Tasks Table)
+task_id: 12
+title: Research Paper Draft
+description: Initial draft for Chapters 1–3
+start_datetime: 2025-12-01 09:00:00
+end_datetime: 2025-12-10 17:00:00
+priority: High
+status: Pending
+created_by: princess.a.petancio@gmail.com
