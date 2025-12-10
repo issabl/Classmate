@@ -1,132 +1,383 @@
 import Sidebar from "../Home/sidebar";
 import WhiteContainer from "../Layout/whitecontainer";
 import TopSection from "../Layout/TopPart";
-
-import { Calendar, Clock, ChevronDown, X } from "lucide-react";
+import { Calendar, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export default function TaskSection() {
+  // === TASK STATES ===
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [startTime, setStartTime] = useState("09:00 AM");
+  const [endTime, setEndTime] = useState("05:00 PM");
+  const [priority, setPriority] = useState<"Low" | "Med" | "High">("Med");
+  const [showStartCal, setShowStartCal] = useState(false);
+  const [showEndCal, setShowEndCal] = useState(false);
+
+  // === INVITE MEMBERS STATES & FUNCTIONS ===
+  const [emailInput, setEmailInput] = useState("");
+  const [members, setMembers] = useState<{ email: string; name: string; avatar: string }[]>([]);
+  const [registeredUsers, setRegisteredUsers] = useState<Record<string, { name: string; avatar: string }>>({});
+  const [loadingUsers, setLoadingUsers] = useState(true);
+  const [error, setError] = useState("");
+
+  // Fetch registered users for dropdown/invites
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch('/api/users');
+        if (!response.ok) throw new Error('Failed to fetch users');
+        const users = await response.json();
+        const userMap = users.reduce((acc: Record<string, { name: string; avatar: string }>, user: { user_id: number; full_name: string; email: string; profile_picture_url?: string }) => {
+          acc[user.email.toLowerCase()] = {
+            name: user.full_name,
+            avatar: user.profile_picture_url || '/default-avatar.png'  // Fallback avatar
+          };
+          return acc;
+        }, {});
+        setRegisteredUsers(userMap);
+        setLoadingUsers(false);
+      } catch (err) {
+        setError('Failed to load registered users');
+        setLoadingUsers(false);
+      }
+    };
+    fetchUsers();
+  }, []);
+
+  const handleAddMember = () => {
+    const email = emailInput.trim().toLowerCase();
+    if (!email) return;
+
+    if (members.some(m => m.email === email)) {
+      setEmailInput("");
+      return;
+    }
+
+    if (registeredUsers[email]) {
+      setMembers(prev => [...prev, { email, ...registeredUsers[email] }]);
+      setEmailInput("");
+    } else {
+      alert("User with this email is not registered in ClassMate.");
+      setEmailInput("");
+    }
+  };
+
+  const removeMember = (email: string) => {
+    setMembers(prev => prev.filter(m => m.email !== email));
+  };
+
+ // === UPDATED SUBMIT HANDLER ===
+const handleSubmit = async () => {
+  console.log('Button clicked! Starting submit...');
+
+  // Enhanced validation
+  if (!title.trim() || !description.trim() || !startDate || !endDate) {
+    alert("Please fill all required fields (title, description, dates).");
+    return;
+  }
+  if (new Date(endDate.split('/').reverse().join('-')) < new Date(startDate.split('/').reverse().join('-'))) {
+    alert("End date must be after start date.");
+    return;
+  }
+  console.log('Validation passed!');
+
+  const inviteEmails = members.map(m => m.email);
+  console.log('Invite emails:', inviteEmails);
+
+  // Convert dates to ISO (YYYY-MM-DD) for server compatibility
+  const parseDateToISO = (dateStr: string): string => {
+    if (!dateStr) return '';
+    const [d, m, y] = dateStr.split('/').map(Number);
+    const fullYear = y < 50 ? 2000 + y : 1900 + y; // Handle YY -> YYYY
+    return `${fullYear}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+  };
+  const startDateISO = parseDateToISO(startDate);
+  const endDateISO = parseDateToISO(endDate);
+
+  // Convert times to 24hr format (e.g., "09:00" without AM/PM)
+  const parseTimeTo24hr = (timeStr: string): string => {
+    if (!timeStr) return '';
+    const [time, period] = timeStr.split(' ');
+    let [hours, minutes] = time.split(':').map(Number);
+    if (period === 'PM' && hours !== 12) hours += 12;
+    if (period === 'AM' && hours === 12) hours = 0;
+    return `${String(hours).padStart(2, '0')}:${String(minutes || 0).padStart(2, '0')}`;
+  };
+  const startTime24 = parseTimeTo24hr(startTime);
+  const endTime24 = parseTimeTo24hr(endTime);
+
+  // Map priority to a common server format (adjust if your server uses numbers/enums)
+  const priorityMap: Record<string, string | number> = { Low: 'low', Med: 'medium', High: 'high' };
+  const serverPriority = priorityMap[priority] || priority;
+
+  // Add creator/user_id if available (e.g., from localStorage or context)
+  // Assuming you have a user session; replace with your auth logic
+  const userId = localStorage.getItem('userId') || '1'; // Fallback for testing; get real ID
+
+  const formData = {
+  title: title.trim(),
+  description: description.trim(),
+  startDate: startDateISO,
+  startTime: startTime24,
+  endDate: endDateISO,
+  endTime: endTime24,
+  priority: serverPriority,
+  memberEmails: inviteEmails,
+  creatorId: userId,
+};
+
+  console.log('Form data prepared:', formData);
+
+  // Use relative URL for dev/prod consistency (avoids CORS/400)
+  const url = '/api/tasks'; // Changed from full localhost
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        // Add auth if needed (e.g., Bearer token or cookie is auto-sent in same-origin)
+        // 'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify(formData),
+    });
+
+    console.log('Response status:', response.status);
+    
+    // Log full response body for server error details
+    const responseBody = await response.text();
+    
+    if (!response.ok) {
+      let errorMsg = `HTTP ${response.status}: ${response.statusText}`;
+      try {
+        const parsed = JSON.parse(responseBody);
+        errorMsg += ` - Server says: ${parsed.error || parsed.message || 'Unknown error'}`;
+      } catch {} // Ignore parse errors
+      
+    }
+
+    const data = JSON.parse(responseBody); // Parse if not already
+    if (data.error) {
+      alert('Error: ' + data.error);
+    } else {
+      alert('Task created successfully! ID: ' + data.taskId);
+      // Clear form
+      setTitle(''); setDescription(''); setStartDate(''); setEndDate(''); 
+      setStartTime('09:00 AM'); setEndTime('05:00 PM'); setPriority('Med'); setMembers([]);
+    }
+  } catch (err) {
+    alert('Failed to create task: ' );
+  }
+};
+  const formatDate = (date: Date) => {
+    const d = date.getDate().toString().padStart(2, "0");
+    const m = (date.getMonth() + 1).toString().padStart(2, "0");
+    const y = date.getFullYear().toString().slice(-2);
+    return `${d}/${m}/${y}`;
+  };
+
+  const MiniCalendar = ({ value, onChange, onClose }: { value: string; onChange: (s: string) => void; onClose: () => void }) => {
+    const today = new Date();
+    const [currentMonth, setCurrentMonth] = useState(today);
+
+    useEffect(() => {
+      if (value) {
+        const [d, m, y] = value.split("/");
+        if (d && m && y) {
+          setCurrentMonth(new Date(parseInt("20" + y), parseInt(m) - 1, parseInt(d)));
+        }
+      }
+    }, [value]);
+
+    const goPrevMonth = () => setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+    const goNextMonth = () => setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+
+    const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
+    const firstDay = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
+    const days = [];
+    const prevMonthDays = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 0).getDate();
+
+    for (let i = firstDay - 1; i >= 0; i--) days.push({ day: prevMonthDays - i, isCurrent: false });
+    for (let i = 1; i <= daysInMonth; i++) days.push({ day: i, isCurrent: true });
+    while (days.length < 42) days.push({ day: days.length - daysInMonth - firstDay + 1, isCurrent: false });
+
+    return (
+      <div className="absolute top-10 left-0 bg-white rounded-2xl shadow-2xl p-4 z-50 border border-gray-200 w-72">
+        <div className="flex justify-between items-center mb-3">
+          <button onClick={goPrevMonth} className="p-1 hover:bg-gray-100 rounded"><ChevronLeft size={20} /></button>
+          <div className="font-semibold text-gray-800">
+            {currentMonth.toLocaleString("default", { month: "long" })} {currentMonth.getFullYear()}
+          </div>
+          <button onClick={goNextMonth} className="p-1 hover:bg-gray-100 rounded"><ChevronRight size={20} /></button>
+        </div>
+
+        <div className="grid grid-cols-7 gap-1 text-xs">
+          {["S", "M", "T", "W", "T", "F", "S"].map(d => (
+            <div key={d} className="text-center font-bold text-gray-500 py-2">{d}</div>
+          ))}
+          {days.map((item, i) => {
+            const dateStr = item.isCurrent ? formatDate(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), item.day)) : "";
+            const isSelected = value === dateStr;
+            const isToday = item.isCurrent && item.day === today.getDate() && currentMonth.getMonth() === today.getMonth() && currentMonth.getFullYear() === today.getFullYear();
+
+            return (
+              <button
+                key={i}
+                onClick={() => item.isCurrent && (onChange(dateStr), onClose())}
+                disabled={!item.isCurrent}
+                className={`
+                  w-9 h-9 rounded-full text-sm transition-all
+                  ${!item.isCurrent ? "text-gray-300 cursor-default" : "hover:bg-gray-100"}
+                  ${isSelected ? "bg-[#D8A75B] text-white font-bold" : ""}
+                  ${isToday && !isSelected ? "ring-2 ring-[#D8A75B] ring-inset" : ""}
+                `}
+              >
+                {item.day}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="flex w-full bg-[#E7E7E7]">
-
       <Sidebar />
-
       <WhiteContainer>
         <TopSection />
 
-        <div className="mt-4 px-8 pb-8 w-full"> {/* slightly smaller spacing */}
-          {/* MAIN FORM WRAPPER */}
+        <div className="mt-4 px-8 pb-8 w-full">
           <div className="bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.1)] p-6 border border-gray-200 max-h-[580px] overflow-y-auto">
 
-
             {/* TASK TITLE */}
-            <label className="block text-base font-semibold mb-1.5">Task Title</label> {/* smaller text */}
-            <input
-              type="text"
-              placeholder="Enter task title"
-              className="w-[60%] bg-[#F0F0F0] rounded-lg px-3 py-2.5 mb-4 outline-none text-gray-700 text-sm" // smaller input
+            <label className="block text-base font-semibold mb-1.5">Task Title</label>
+            <input 
+              type="text" 
+              placeholder="Enter task title" 
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-[60%] bg-[#F0F0F0] rounded-lg px-3 py-2.5 mb-4 outline-none text-gray-700 text-sm" 
             />
 
             {/* DESCRIPTION */}
             <label className="block text-base font-semibold mb-1.5">Description</label>
-            <textarea
-              placeholder="Enter task description"
-              className="w-[70%] bg-[#F0F0F0] rounded-lg px-3 py-2.5 h-28 mb-6 outline-none text-gray-700 text-sm" 
+            <textarea 
+              placeholder="Enter task description" 
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-[70%] bg-[#F0F0F0] rounded-lg px-3 py-2.5 h-28 mb-6 outline-none text-gray-700 text-sm resize-none" 
             />
 
-            {/* DATE + INVITE MEMBERS ROW */}
-            <div className="flex items-start gap-15"> {/* reduced gap */}
+            <div className="flex items-start gap-15">
 
-              {/* LEFT COLUMN (DATE & TIME & PRIORITY) */}
-              <div className="w-[45%]">
+              {/* LEFT COLUMN */}
+              <div className="w-[45%] relative">
 
                 {/* DATE */}
                 <label className="block text-base font-semibold mb-1.5">Date</label>
                 <div className="flex items-center gap-3 mb-4">
-                  <input
-                    type="text"
-                    placeholder="DD/MM/YY"
-                    className="bg-[#EBEBEB] rounded-lg px-3 py-1.5 w-[40%] outline-none text-gray-700 text-sm"
-                  />
-
-                  <span className="text-gray-400 text-sm">—</span>
-
-                  <input
-                    type="text"
-                    placeholder="DD/MM/YY"
-                    className="bg-[#EBEBEB] rounded-lg px-3 py-1.5 w-[40%] outline-none text-gray-700 text-sm"
-                  />
-
-                  <Calendar className="text-gray-600" size={18} /> {/* smaller icon */}
+                  <div className="relative flex-1">
+                    <input type="text" placeholder="DD/MM/YY" value={startDate} readOnly onClick={() => setShowStartCal(!showStartCal)} className="bg-[#EBEBEB] rounded-lg px-3 py-1.5 w-full outline-none text-gray-700 text-sm cursor-pointer font-medium" />
+                    {showStartCal && <MiniCalendar value={startDate} onChange={setStartDate} onClose={() => setShowStartCal(false)} />}
+                  </div>
+                  <span className="text-gray-400 text-lg font-bold">—</span>
+                  <div className="relative flex-1">
+                    <input type="text" placeholder="DD/MM/YY" value={endDate} readOnly onClick={() => setShowEndCal(!showEndCal)} className="bg-[#EBEBEB] rounded-lg px-3 py-1.5 w-full outline-none text-gray-700 text-sm cursor-pointer font-medium" />
+                    {showEndCal && <MiniCalendar value={endDate} onChange={setEndDate} onClose={() => setShowEndCal(false)} />}
+                  </div>
+                  <Calendar className="text-gray-600" size={18} />
                 </div>
 
                 {/* TIME */}
                 <label className="block text-base font-semibold mb-1.5">Time</label>
-                <div className="flex items-center gap-3 mb-6">
-                  <input
-                    type="text"
-                    placeholder="HH:MM (AM/PM)"
-                    className="bg-[#EBEBEB] rounded-lg px-3 py-1.5 w-[50%] outline-none text-gray-700 text-sm"
-                  />
-                  <Clock size={18} className="text-gray-600" />
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <input type="text" placeholder="HH:MM" value={startTime.split(" ")[0] || ""} onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9:]/g, "").slice(0, 5);
+                      if (val === "" || /^([0-1]?[0-9]|2[0-3]):?([0-5][0-9])?$/.test(val)) {
+                        setStartTime(val + (val ? " " : "") + (startTime.includes("AM") ? "AM" : "PM"));
+                      }
+                    }} className="bg-[#EBEBEB] rounded-lg px-3 py-1.5 w-28 outline-none text-gray-700 text-sm font-medium" />
+                    <button onClick={() => setStartTime(p => p.includes("AM") ? p.replace("AM", "PM") : p.replace("PM", "AM"))}
+                      className={`px-5 py-1.5 rounded-lg text-sm font-bold transition-all shadow-md ${startTime.includes("AM") ? "bg-[#D8A75B] text-white" : "bg-[#4A5568] text-white"}`}>
+                      {startTime.includes("AM") ? "AM" : "PM"}
+                    </button>
+                    <span className="text-gray-600 text-sm">Start</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <input type="text" placeholder="HH:MM" value={endTime.split(" ")[0] || ""} onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9:]/g, "").slice(0, 5);
+                      if (val === "" || /^([0-1]?[0-9]|2[0-3]):?([0-5][0-9])?$/.test(val)) {
+                        setEndTime(val + (val ? " " : "") + (endTime.includes("AM") ? "AM" : "PM"));
+                      }
+                    }} className="bg-[#EBEBEB] rounded-lg px-3 py-1.5 w-28 outline-none text-gray-700 text-sm font-medium" />
+                    <button onClick={() => setEndTime(p => p.includes("AM") ? p.replace("AM", "PM") : p.replace("PM", "AM"))}
+                      className={`px-5 py-1.5 rounded-lg text-sm font-bold transition-all shadow-md ${endTime.includes("AM") ? "bg-[#D8A75B] text-white" : "bg-[#4A5568] text-white"}`}>
+                      {endTime.includes("AM") ? "AM" : "PM"}
+                    </button>
+                    <span className="text-gray-600 text-sm">End</span>
+                  </div>
                 </div>
 
-                {/* PRIORITY SECTION */}
-                <label className="block text-base font-semibold mb-2">Priority</label>
+                {/* PRIORITY */}
+                <label className="block text-base font-semibold mb-2 mt-5">Priority</label>
                 <div className="flex items-center gap-3">
-                  <button className="bg-[#EBEBEB] text-gray-600 px-5 py-1.5 rounded-lg text-sm">
-                    Low
-                  </button>
-
-                  <button className="bg-[#A76BF1] text-white px-5 py-1.5 rounded-lg text-sm">
-                    Med
-                  </button>
-
-                  <button className="bg-[#EBEBEB] text-gray-600 px-5 py-1.5 rounded-lg text-sm">
-                    High
-                  </button>
+                  <button onClick={() => setPriority("Low")} className={`px-5 py-1.5 rounded-lg text-sm font-medium transition-all ${priority === "Low" ? "bg-green-500 text-white shadow-md" : "bg-[#EBEBEB] text-gray-600"}`}>Low</button>
+                  <button onClick={() => setPriority("Med")} className={`px-5 py-1.5 rounded-lg text-sm font-medium transition-all ${priority === "Med" ? "bg-[#A76BF1] text-white shadow-md" : "bg-[#EBEBEB] text-gray-600"}`}>Med</button>
+                  <button onClick={() => setPriority("High")} className={`px-5 py-1.5 rounded-lg text-sm font-medium transition-all ${priority === "High" ? "bg-red-500 text-white shadow-md" : "bg-[#EBEBEB] text-gray-600"}`}>High</button>
                 </div>
               </div>
 
-              {/* INVITE MEMBERS CARD */}
+              {/* INVITE MEMBERS – FULLY WORKING */}
               <div className="w-[40%]">
-                <div className="p-4 rounded-xl border border-gray-300 shadow-[0_4px_12px_rgba(0,0,0,0.1)] bg-linear-to-b from-[#F4E5C8] to-[#C5912D]">
+                <div className="p-4 rounded-xl border border-gray-300 shadow-[0_4px_12px_rgba(0,0,0,0.1)] bg-gradient-to-b from-[#F4E5C8] to-[#C5912D]">
                   <h2 className="font-semibold text-base mb-2.5">Invite Members</h2>
 
-                  {/* SELECT DROPDOWN */}
                   <div className="relative mb-3">
-                    <button className="w-full bg-white rounded-lg border border-gray-300 px-3 py-2 flex justify-between items-center text-sm">
-                      <span className="text-gray-600">Select Members</span>
-                      <ChevronDown size={18} className="text-gray-600" />
-                    </button>
+                    <input
+                      type="email"
+                      value={emailInput}
+                      onChange={(e) => setEmailInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleAddMember()}
+                      onBlur={handleAddMember}
+                      placeholder="Type email and press Enter"
+                      className="w-full bg-white rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#D8A75B] transition"
+                    />
                   </div>
 
-                  {/* SELECTED MEMBERS LIST */}
-                  <div className="flex flex-col gap-1.5">
-                    {/* MEMBER 1 */}
-                    <div className="bg-white rounded-lg px-2.5 py-1.5 flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2">
-                        <img src="/person1.png" className="w-6 h-6 rounded-full" />
-                        <span className="text-gray-800">Novin Mae Aguilar</span>
-                      </div>
-                      <X size={18} className="text-gray-700 cursor-pointer" />
-                    </div>
-
-                    {/* MEMBER 2 */}
-                    <div className="bg-white rounded-lg px-2.5 py-1.5 flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2">
-                        <img src="/person2.png" className="w-6 h-6 rounded-full" />
-                        <span className="text-gray-800">Mary Jane Pogoy</span>
-                      </div>
-                      <X size={18} className="text-gray-700 cursor-pointer" />
-                    </div>
+                  <div className="flex flex-col gap-1.5 max-h-48 overflow-y-auto">
+                    {loadingUsers ? (
+                      <p className="text-white text-xs text-center py-2">Loading users...</p>
+                    ) : error ? (
+                      <p className="text-white text-xs text-center py-2">Error: {error}</p>
+                    ) : members.length === 0 ? (
+                      <p className="text-white text-xs text-center py-2">No members added yet</p>
+                    ) : (
+                      members.map((member) => (
+                        <div key={member.email} className="bg-white rounded-lg px-2.5 py-1.5 flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-2">
+                            <img src={member.avatar} alt={member.name} className="w-6 h-6 rounded-full object-cover" />
+                            <span className="text-gray-800 font-medium">{member.name}</span>
+                          </div>
+                          <button onClick={() => removeMember(member.email)} className="text-gray-500 hover:text-red-600 transition">
+                            <X size={18} />
+                          </button>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               </div>
             </div>
 
             {/* ADD TASK BUTTON */}
-            <div className="mt-3">
-              <button className="bg-[#5F3B00] text-white rounded-full px-8 py-2.5 font-semibold text-base mx-auto block">
+            <div className="mt-8 text-center">
+              <button onClick={handleSubmit} className="bg-[#5F3B00] text-white rounded-full px-8 py-3 font-semibold text-base hover:bg-[#4a2f00] transition shadow-lg">
                 Add a task
               </button>
             </div>

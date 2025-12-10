@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, Moon, Bell } from "lucide-react";
+import { Search, Moon, Sun, Bell } from "lucide-react";
 import Profile from "../Profile/profile";
 import Notifications from "../Layout/notifications";
 
@@ -19,13 +19,9 @@ export default function TopPart() {
   // Apply dark class when darkMode changes
   useEffect(() => {
     const html = document.documentElement;
-    if (darkMode) {
-      html.classList.add("dark");
-    } else {
-      html.classList.remove("dark");
-    }
+    if (darkMode) html.classList.add("dark");
+    else html.classList.remove("dark");
 
-    // Save preference
     localStorage.setItem("darkMode", darkMode.toString());
   }, [darkMode]);
 
@@ -33,31 +29,46 @@ export default function TopPart() {
     <>
       <div className="w-full flex items-center justify-between px-6 mt-2 relative z-10">
         {/* LEFT SIDE - Search Bar */}
-        <div className="flex items-center gap-3 w-[260px] rounded-full px-4 py-2 border border-[#E5E5E5] shadow-[0_4px_12px_rgba(0,0,0,0.08)] bg-white dark:bg-gray-900">
-          <Search className="text-gray-500 dark:text-gray-300" size={16} />
+        <div
+          className={`
+            flex items-center gap-3 
+            w-[260px] 
+            rounded-full 
+            px-5 py-3
+            shadow-[0_10px_25px_rgba(0,0,0,0.25)]
+            ${darkMode ? "bg-[#FFEACA]" : "bg-white"}
+          `}
+        >
+          <Search
+            size={18}
+            className={darkMode ? "text-[#7D5414]" : "text-black"}
+          />
           <input
             type="text"
             placeholder="Search"
-            className="w-full bg-transparent focus:outline-none text-sm text-gray-800 dark:text-white"
+            className={`
+              w-full bg-transparent focus:outline-none text-sm
+              ${darkMode
+                ? "text-[#7D5414] placeholder-[#7D5414]/60"
+                : "text-black placeholder-black/60"
+              }
+            `}
           />
         </div>
 
         {/* RIGHT SIDE ICONS */}
         <div className="flex items-center gap-6 -mt-4">
-          {/* Moon icon */}
+          {/* Toggle icon */}
           <button
-            className={`
-              hover:opacity-70 transition px-2 py-1 rounded
-              ${darkMode ? "bg-gray-800/30" : "bg-white/30"}
-            `}
+            className="hover:opacity-70 transition px-2 py-1 rounded"
             onClick={() => setDarkMode(!darkMode)}
           >
-            <Moon
-              size={20}
-              className={`${darkMode ? "text-yellow-400" : "text-black dark:text-white"}`}
-            />
+            {darkMode ? (
+              <Sun size={20} className="text-yellow-400" /> // Sun in dark mode
+            ) : (
+              <Moon size={20} className="text-black" />      // Moon in light mode
+            )}
           </button>
-
 
           {/* Bell icon */}
           <button

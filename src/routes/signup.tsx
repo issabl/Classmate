@@ -8,3 +8,4 @@ export const signupRoute = createRoute({
   path: "signup", // relative → renders at "/signup"
   component: SignUp,
 });
+
