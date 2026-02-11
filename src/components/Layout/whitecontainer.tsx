@@ -2,7 +2,7 @@ export default function WhiteContainer({ children }: { children: React.ReactNode
   return (
     <div
       className="
-        bg-white
+        white-container
         rounded-[30px]
         m-3
         p-[8px]

@@ -40,10 +40,10 @@ export default function HomeFolders() {
   ];
 
   // Customize card size, position, and spacing
-  const cardWidth = "316px";
+  const cardWidth = "325px";
   const cardHeight = "155px";
   const stackTop = "330px";
-  const stackLeft = "1090px";
+  const stackLeft = "1045px";
   const cardSpacing = "-90px"; // negative margin for overlap
 
   // Default overlay positions if not specified in the task
@@ -89,7 +89,7 @@ export default function HomeFolders() {
 
           {/* Title */}
           <h2
-            className="absolute text-[16px] font-sm text-gray-900 leading-none"
+            className="absolute text-[16px] font-sm leading-none homefolders-text"
             style={task.titlePosition || overlayPositions.title}
           >
             {task.title}
@@ -97,7 +97,7 @@ export default function HomeFolders() {
 
           {/* Subject */}
           <p
-            className="absolute text-[11px] text-gray-800"
+            className="absolute text-[11px] leading none homefolders-text"
             style={task.subjectPosition || overlayPositions.subject}
           >
             {task.subject}
@@ -105,7 +105,7 @@ export default function HomeFolders() {
 
           {/* Time */}
           <p
-            className="absolute text-[11px] font-semibold text-gray-900"
+            className="absolute text-[11px] font-semibold leading-none homefolders-text"
             style={task.timePosition || overlayPositions.time}
           >
             {task.time}

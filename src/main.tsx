@@ -4,6 +4,7 @@ import { RouterProvider, createRouter, createBrowserHistory } from "@tanstack/re
 import { routeTree } from "./routeTree";
 import "./index.css";
 
+
 const router = createRouter({
   routeTree,
   history: createBrowserHistory(),

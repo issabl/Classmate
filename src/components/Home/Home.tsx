@@ -21,7 +21,7 @@ export default function Home() {
   }, [selected]);
 
   return (
-    <div className="flex h-screen w-full bg-[#E7E7E7]">
+    <div className="flex h-screen w-full linear-gradient(to bottom, #160F0A, #7C5138)">
       <Sidebar />
 
       <WhiteContainer>
